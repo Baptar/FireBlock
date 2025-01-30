@@ -212,7 +212,7 @@ void Game::onSpacePressed() {
 
 bool Game::hasCollision(float gridx, float gridy)
 {
-	if (gridx < 1.5)
+	if (gridx < 0)
 		return true;
 
 	auto wallRightX = (C::RES_X / C::GRID_SIZE) -1;

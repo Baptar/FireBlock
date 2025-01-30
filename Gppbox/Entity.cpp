@@ -9,62 +9,84 @@ Entity::Entity(sf::Shape* _spr) : spr(_spr) {
 }
 
 void Entity::update(double dt){
+	Game& g = *Game::me;
+
 	double rate = 1.0 / dt;
 	double dfr = 60.0f / rate;
 
 	dy += gravy * dt;
-
 	dx = dx * pow(frx, dfr);
+
+	
+
+
 	dy = dy * pow(fry, dfr);
 
 	rx += dx * dt;
 	ry += dy * dt;
 
-	Game& g = *Game::me;
-	
-	if (rx > 1.0f) {
-		if (! g.hasCollision( cx+rx,cy+ry)) {
-			rx--;
-			cx++;
-		}
-		else {
+	// Collision Left
+	do
+	{
+		if (g.hasCollision(cx -1 , cy) && rx < 0.5)
+		{
 			dx = 0;
-			rx = 0.7f;
+			rx = 0.65f;
 		}
-
-	}
-	if (rx < 0) {
-		if (!g.hasCollision(cx + rx, cy + ry)) {
+		else if (rx < 0)
+		{
 			rx++;
 			cx--;
 		}
-		else {
+	} while (rx < 0);
+
+	// Collision Right
+	do
+	{
+		if (g.hasCollision(cx + 1, cy) && rx > 0.5)
+		{
 			dx = 0;
-			rx = 0.3f;
+			rx = 0.35f;
 		}
-	}
+		else if (rx > 1)
+		{
+			rx--;
+			cx++;
+		}
+	} while (rx > 1);
 
 	if (jumping) {
-		if ((dy > 0) ) {
-			if (g.hasCollision(cx + rx, cy + ry)) {
+		// Montée
+		do
+		{
+			if (g.hasCollision(cx, cy - 1) && ry <= 0.01f)
+			{
 				setJumping(false);
-				ry = 0.99f;
 				dy = 0;
+				ry = 0.01f;
 			}
-			else {
-				if(ry > 1) {
-					ry--;
-					cy++;
-				}
-			}
-		}
-
-		if (dy < 0) {
-			while (ry < 0) {
+			else if (ry < 0)
+			{
 				ry++;
 				cy--;
 			}
-		}
+		} while (ry < 0);
+
+		// Descente
+		do
+		{
+			if (g.hasCollision(cx, cy + 1) && ry >= 0.99f)
+			{
+				setJumping(false);
+				dy = 0;
+				ry = 0.99f;
+			}
+			else if (ry > 1)
+			{
+				ry--;
+				cy++;
+			}
+		} while (ry > 1);
 	}
 	
 	syncPos();

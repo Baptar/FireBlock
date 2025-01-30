@@ -21,6 +21,7 @@ public:
 	float		frx = 0.88f;
 	float		fry = 1.0f;
 	bool		jumping = false;
+
 					Entity(sf::Shape* spr);
 
 	void			update( double dt );
