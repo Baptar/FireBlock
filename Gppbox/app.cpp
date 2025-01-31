@@ -1,21 +1,18 @@
-#include <iostream> 
+#include <algorithm>
+#include <iostream>
 #include <array>
 #include <numeric>
-#include <algorithm>
 #include <functional>
 
 #include <imgui.h>
 #include <imgui-SFML.h>
 
 #include <SFML/Graphics.hpp>
-#include <SFML/Window/Keyboard.hpp>
 #include <SFML/Audio.hpp>
 
 #include "Bloom.hpp"
-#include "Dice.hpp"
 #include "Lib.hpp"
 #include "Game.hpp"
-#include "Interp.hpp"
 #include "HotReloadShader.hpp"
 #include "app.h"
 #include "C.hpp"
@@ -23,6 +20,10 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+
+#include "Entity.hpp"
+#include "SecondOrderDynamics.h"
+
 extern "C" {
 	// Force the use of the NVidia-graphics card on notebooks with both an IGP and a GPU
 	_declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
@@ -41,45 +42,63 @@ static int curDts = 0;
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(C::RES_X, C::RES_Y,32), "SFML works!");
-    //sf::RenderWindow window(sf::VideoMode(800, 600,32), "SFML works!");
-    //sf::RenderWindow window(sf::VideoMode(1280, 720,32), "SFML works!");
+#pragma region Initialization
+    sf::RenderWindow window(sf::VideoMode(C::RES_X, C::RES_Y,32), "SFML works!", sf::Style::Fullscreen);
 	window.setVerticalSyncEnabled(true);
-	window.setFramerateLimit(60);
+	
 	Font font;
 
+	// load font
     if (!font.loadFromFile("res/MAIAN.TTF")) {
-        cout << "ERROR NO FONT" << endl;
+        cout << "ERROR NO FONT" << '\n';
         return 1;
     }
 
+	// check shader available
 	if (!sf::Shader::isAvailable())
 	{
-		cout << "ERROR NO SHADER SYSTEM" << endl;
+		cout << "ERROR NO SHADER SYSTEM" << '\n';
 		return 1;
 	}
 
+	// Manage sound
+	sf::SoundBuffer buffer;
+	if (!buffer.loadFromFile("mainSound.wav")) return 1;
+	
+	sf::Sound sound;
+	sound.setBuffer(buffer);
+	sound.setVolume(20);
+	sound.setLoop(true);
+	sound.play();
+
+	// init ImGui SFML
 	ImGui::SFML::Init(window);
 
+	// init game
     Game g(&window);
-
-	Vector2i winPos;
-
+	Entity& player = g.getPlayer();
+	
+	// init Camera
+	sf::Vector2f cameraPos ={ 0 , 0};
+	SecondOrderDynamics cameraDynamic(g.f, g.z, g.r, cameraPos);
 	View v = window.getDefaultView();
 	Vector2f viewCenter = v.getCenter();
-
-	sf::Clock timer;
-
+	float zoom = g.zoom;
+	v.zoom(zoom);
+#pragma endregion
+	
+#pragma region FPS
 	sf::Text fpsCounter;
 	fpsCounter.setFont(font);
 	fpsCounter.setString("FPS:");
-
 	double frameStart = 0.0;
 	double frameEnd = 0.0;
+#pragma endregion
 
+#pragma region Bloom
 	sf::Texture winTex;
 	winTex.create(window.getSize().x, window.getSize().y);
-
+	
 	bloomShader = new HotReloadShader("res/simple.vert", "res/bloom.frag");
 	blurShader = new HotReloadShader("res/simple.vert", "res/blur.frag");
 	sf::RenderTexture* destX = new sf::RenderTexture();
@@ -92,22 +111,21 @@ int main()
 
 	float bloomWidth = 12;
 	sf::Glsl::Vec4 bloomMul(1,1,1,0.8f);
-
+#pragma endregion
+	
     while (window.isOpen())
     {
 		double dt = frameEnd - frameStart;
 		frameStart = Lib::getTimeStamp();
-
-		if (dt < 0.00000001) {
-			dt = 0.00000001;
-		}
-
-        sf::Event event;
+		dt = std::max(dt, 0.00000001);
+    	
+		sf::Event event;
 		while (window.pollEvent(event))//sort un evenement de la liste pour le traiter
 		{
 			ImGui::SFML::ProcessEvent(event);
 			g.processInput(event);
 
+			#pragma region ResizeWindow
 			if (event.type == sf::Event::Resized) {
 				auto nsz = window.getSize();
 				winTex.create(window.getSize().x, window.getSize().y);
@@ -121,13 +139,12 @@ int main()
 				v = sf::View(Vector2f(nsz.x * 0.5f, nsz.y * 0.5f), Vector2f((float)nsz.x, (float)nsz.y));
 				viewCenter = v.getCenter();
 			}
-		}
+			#pragma endregion
+		}		
 
-		//don't use imgui before this;
-		ImGui::SFML::Update(window, sf::seconds((float)dt));
-
-        g.update(dt);
-		
+		#pragma region ImGui
+    	//don't use imgui before this;
+    	ImGui::SFML::Update(window, sf::seconds((float)dt));
 		if (ImGui::CollapsingHeader("View")) {
 			auto sz = v.getSize();
 			ImGui::Value("size x", sz.x);
@@ -147,35 +164,45 @@ int main()
 			ImGui::LabelText("Avg Update Time", "%0.6f", captureMdt);
 			ImGui::LabelText("Avg FPS", "%0.6f", 1.0 / captureMdt);
 		}
-        window.clear();
-
-		window.setView(v);//keep view up to date in case we want to do something with like... you know what.
 
 		if (ImGui::CollapsingHeader("Bloom Control")) {
 			ImGui::SliderFloat("bloomWidth", &bloomWidth, 0, 55);//55 is max acceptable kernel size for constants, otherwise we should use a texture
 			ImGui::ColorEdit4("bloomMul", &bloomMul.x);
 			ImGui::ColorEdit4("bloomMul2", &bloomMul.x);
 		}
+		#pragma endregion
+    	
+    	g.update(dt);
+    	g.cameraView = v;
 		g.im();
-
         g.draw(window);
-
 		window.draw(fpsCounter);
 
-		if (blurShader) blurShader->update(dt);
-		if (bloomShader) bloomShader->update(dt);
+    	// Bloom Management
+    	if (blurShader) blurShader->update(dt);
+    	if (bloomShader) bloomShader->update(dt);
+    	if (bloomWidth)
+    	{
+    		window.setView(window.getDefaultView());
+    		Bloom::render(window,winTex,destX,destFinal,&blurShader->sh,&bloomShader->sh, bloomWidth, bloomMul);
+    	}
 
-		if (bloomWidth)
-			Bloom::render(window,winTex,destX,destFinal,&blurShader->sh,&bloomShader->sh, bloomWidth, bloomMul);
-
+		#pragma region Camera
+    	float posXDiff = 100;
+    	float posYDiff = player.crouching ? 20 : 0;
+    	if (player.moveRight) posXDiff *= -1;
+    	cameraDynamic.setParams(g.f, g.z, g.r);
+    	cameraPos = cameraDynamic.Update(dt,{ (float)player.getPosPixel().x - posXDiff,(float) player.getPosPixel().y + posYDiff});
+    	v.setCenter(cameraPos);
+    	v.zoom(g.zoom / zoom);
+    	zoom = g.zoom;
+    	window.setView(v);//keep view up to date in case we want to do something with like... you know what.
+		#pragma endregion
+    	
 		ImGui::SFML::Render(window);
         window.display();
-		
-
 		frameEnd = Lib::getTimeStamp();
-		
 		fpsCounter.setString("FPS: "+std::to_string(1.0 / dt));
-		
 		ImGui::EndFrame();
 		
 		curDts++;
@@ -183,6 +210,8 @@ int main()
 			curDts = 0;
 		}
 		dts[curDts] = dt;
+
+    	window.clear();
     }
 
 	ImGui::SFML::Shutdown();

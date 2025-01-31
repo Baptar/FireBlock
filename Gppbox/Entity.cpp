@@ -4,37 +4,33 @@
 #include "C.hpp"
 #include "Game.hpp"
 
-Entity::Entity(sf::Shape* _spr) : spr(_spr) {
+Entity::Entity(sf::RectangleShape* _spr) : spr(_spr), width(_spr->getSize().x / C::GRID_SIZE), height(_spr->getSize().y / C::GRID_SIZE) {
 
 }
 
 void Entity::update(double dt){
 	Game& g = *Game::me;
-
 	double rate = 1.0 / dt;
 	double dfr = 60.0f / rate;
 
 	dy += gravy * dt;
-	dx = dx * pow(frx, dfr);
-
-	
-
-
 	dy = dy * pow(fry, dfr);
-
+	dx = dx * pow(frx, dfr);
+	
 	rx += dx * dt;
 	ry += dy * dt;
-
+	
 	// Collision Left
 	do
 	{
-		if (g.hasCollision(cx -1 , cy) && rx < 0.5)
+		if (g.hasCollision(cx - 1 , cy, width, height) && rx < 0.5)
 		{
 			dx = 0;
-			rx = 0.65f;
+			rx = 0.5f;
 		}
 		else if (rx < 0)
 		{
+			moveRight = false;
 			rx++;
 			cx--;
 		}
@@ -43,25 +39,27 @@ void Entity::update(double dt){
 	// Collision Right
 	do
 	{
-		if (g.hasCollision(cx + 1, cy) && rx > 0.5)
+		if (g.hasCollision(cx + 1, cy, width, height) && rx > 0.5)
 		{
 			dx = 0;
-			rx = 0.35f;
+			rx = 0.5f;
 		}
 		else if (rx > 1)
 		{
+			moveRight = true;
 			rx--;
 			cx++;
 		}
 	} while (rx > 1);
 
+	// Jump
 	if (jumping) {
-		// Montée
+		// Collision when go up
 		do
 		{
-			if (g.hasCollision(cx, cy - 1) && ry <= 0.01f)
+			if (g.hasCollision(cx, cy  - 1, width, height) && ry <= 0.01f)
 			{
-				setJumping(false);
+				gravy = 80;
 				dy = 0;
 				ry = 0.01f;
 			}
@@ -72,13 +70,14 @@ void Entity::update(double dt){
 			}
 		} while (ry < 0);
 
-		// Descente
+		// Collision when go down
 		do
 		{
-			if (g.hasCollision(cx, cy + 1) && ry >= 0.99f)
+			if (g.hasCollision(cx, cy + 1, width, height) && ry >= 0.99f)
 			{
 				setJumping(false);
 				dy = 0;
+				dx *= 0.5f;
 				ry = 0.99f;
 			}
 			else if (ry > 1)
@@ -87,6 +86,19 @@ void Entity::update(double dt){
 				cy++;
 			}
 		} while (ry > 1);
+	}
+	else
+	{
+		if (!g.hasCollision(cx , cy + 1, width, height))
+		{
+			setJumping(true);
+		}
+	}
+
+	if (waitToUncrouch && !g.hasCollision(cx, cy  - 1, width, height * 2))
+	{
+		unCrouch();
+		waitToUncrouch = false;
 	}
 	
 	syncPos();
@@ -128,6 +140,7 @@ bool Entity::im()
 	bool chg = false;
 	
 	Value("jumping", jumping);
+	Value("crouching", crouching);
 	Value("cx", cx);
 	Value("cy", cy);
 
@@ -159,7 +172,15 @@ bool Entity::im()
 		dx = dy = 0;
 		setJumping(false);
 	}
+	if (Button("save")) {
+		(*Game::me).saveData(cx, cy);
+	}
+	if (Button("load")) {
+		(*Game::me).loadData();
+	}
 	return chg||chgCoo;
+
+	
 }
 
 void Entity::setJumping(bool onOff){
@@ -176,8 +197,42 @@ void Entity::setJumping(bool onOff){
 	}
 }
 
+void Entity::crouch()
+{
+	if (crouching) return;
+	
+	crouching = true;
+	height *= 0.5;
+	spr->setSize({C::GRID_SIZE, C::GRID_SIZE});
+	spr->setOrigin({ C::GRID_SIZE * 0.5f, C::GRID_SIZE});
+}
+
+void Entity::unCrouch()
+{
+	if ((*Game::me).hasCollision(cx, cy  - 1, width, height * 2))
+	{
+		waitToUncrouch = true;
+		return;
+	}
+	
+	crouching = false;
+	height *= 2;
+	spr->setSize(Vector2f(C::GRID_SIZE, C::GRID_SIZE * 2) );
+	spr->setOrigin({ C::GRID_SIZE * 0.5f, C::GRID_SIZE * 2});
+	
+}
+
+void Entity::setCrouch(bool onOff)
+{
+	if (crouching == onOff) return;
+	if (onOff) { crouch();}
+	else { unCrouch();}
+}
+
+
 sf::Vector2i Entity::getPosPixel()
 {
 	return sf::Vector2i( (cx+rx)*C::GRID_SIZE, (cy+ry) * C::GRID_SIZE );
 }
+
 

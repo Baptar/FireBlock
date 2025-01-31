@@ -165,6 +165,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Bloom.cpp" />
+    <ClCompile Include="SecondOrderDynamics.cpp" />
+    <ClCompile Include="Ennemy.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="HotReloadShader.cpp" />
@@ -181,7 +183,9 @@
     <ClInclude Include="app.h" />
     <ClInclude Include="Bloom.hpp" />
     <ClInclude Include="C.hpp" />
+    <ClInclude Include="SecondOrderDynamics.h" />
     <ClInclude Include="Dice.hpp" />
+    <ClInclude Include="Ennemy.h" />
     <ClInclude Include="Entity.hpp" />
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="HotReloadShader.hpp" />
