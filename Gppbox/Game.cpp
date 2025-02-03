@@ -25,13 +25,17 @@ Game::Game(sf::RenderWindow * win) {
 	this->win = win;
 	me = this;
 	bg = sf::RectangleShape(Vector2f((float)win->getSize().x, (float)win->getSize().y));
+	bg2= sf::RectangleShape(Vector2f((float)win->getSize().x, (float)win->getSize().y));
 
-	bool isOk = tex.loadFromFile("res/bg_stars.png");
+	bool isOk = tex.loadFromFile("res/night.png");
 	if (!isOk) {
 		printf("ERR : LOAD FAILED\n");
 	}
 	bg.setTexture(&tex);
 	bg.setSize(sf::Vector2f(C::RES_X, C::RES_Y));
+
+	bg2.setTexture(&tex);
+	bg2.setSize(sf::Vector2f(C::RES_X, C::RES_Y));
 
 	bgShader = new HotReloadShader("res/bg.vert", "res/bg.frag");
 	
@@ -58,13 +62,15 @@ Game::Game(sf::RenderWindow * win) {
 	initMainChar();
 }
 
-void Game::initMainChar(){
-	auto spr = new sf::RectangleShape({ C::GRID_SIZE, C::GRID_SIZE * 2 });
-	spr->setFillColor(sf::Color::Magenta);
-	spr->setOutlineColor(sf::Color::Red);
-	spr->setOutlineThickness(2);
+void Game::initMainChar(){	
+	auto spr = new sf::RectangleShape({ C::GRID_SIZE, C::GRID_SIZE * 2});
+	spr->setFillColor(sf::Color::Transparent);
+	//spr->setOutlineColor(sf::Color::Red);
+	//spr->setOutlineThickness(2);
 	spr->setOrigin({ C::GRID_SIZE * 0.5f, C::GRID_SIZE * 2 });
 	auto e = new Entity(spr);
+	
+	//auto e = new Entity();
 	e->setCooGrid(3, int(C::RES_Y / C::GRID_SIZE) - 10);
 	e->ry = 0.99f;
 	e->syncPos();
@@ -99,46 +105,64 @@ void Game::processInput(sf::Event ev) {
 
 		if (ev.key.code == sf::Keyboard::LControl)
 		{
-			auto mainChar = ents[0];
+			/*auto mainChar = ents[0];
 			if (mainChar) {
 				mainChar->unCrouch();
-			}
+			}*/
 		}
 
-		if (ev.key.code == Keyboard::E) {
-		/*	auto spr = new sf::RectangleShape({ C::GRID_SIZE, C::GRID_SIZE * 2 });
-			spr->setFillColor(sf::Color::Magenta);
-			spr->setOutlineColor(sf::Color::Red);
-			spr->setOutlineThickness(2);
-			spr->setOrigin({ C::GRID_SIZE * 0.5f, C::GRID_SIZE * 2});
-			auto e = new Entity( spr );
-			//e->setCooPixel(335, 337);
-			e->setCooGrid(3,int(C::RES_Y / C::GRID_SIZE)-1);
-			printf("ent added");
-			ents.push_back(e);
-		*/}
+		if (ev.key.code == Keyboard::R) {
+			getPlayer().reload();
+		}
 	}
 	if (ev.type == sf::Event::JoystickButtonReleased)
 	{
-		if (ev.joystickButton.button == 1)
+		if (ev.joystickButton.button == 0) //bottom
 		{
 			auto mainChar = ents[0];
-			if (mainChar) {
-				mainChar->setCrouch(!mainChar->crouching);
+			if (mainChar && !mainChar->jumping && !mainChar->reloading) {
+				mainChar->setJumping(true);
 			}
+		}
+		if (ev.joystickButton.button == 1) // right
+		{
+		}
+		if (ev.joystickButton.button == 2) // left
+		{
+		}
+		if (ev.joystickButton.button == 3) // top
+		{
+		}
+		if (ev.joystickButton.button == 5) // R1
+		{
+			// fire
 		}
 	}
 	if (ev.type == sf::Event::MouseButtonReleased)
 	{
-		if (ev.mouseButton.button == sf::Mouse::Left)
+		if (ev.mouseButton.button == sf::Mouse::Left
+		/*&& ImGui::IsWindowHovered()*/)
 		{
 			printf("mouse left\n");
 			Vector2i mousePositionWindow = sf::Mouse::getPosition(*win);
 			sf::Vector2f mousePosWorld = win->mapPixelToCoords(mousePositionWindow, cameraView);
 			//walls.push_back(Vector2i(mousePosWorld.x/ C::GRID_SIZE, mousePosWorld.y/ C::GRID_SIZE));
 
-			removeWallAtPosition(mousePosWorld.x/ C::GRID_SIZE, mousePosWorld.y/ C::GRID_SIZE);
+			removeWallAtPosition((int)(mousePosWorld.x/ C::GRID_SIZE), (int)(mousePosWorld.y/ C::GRID_SIZE));
 			cacheWalls();
+		}
+	}
+	
+	if (ev.type == sf::Event::MouseButtonReleased)
+	{
+		if (ev.mouseButton.button == sf::Mouse::Right)
+		{
+			printf("Stop Fire\n");
+			// Stop Fire
+			auto mainChar = ents[0];
+			if (mainChar) {
+				mainChar->stopFire();
+			}
 		}
 	}
 }
@@ -176,7 +200,7 @@ void Game::pollInput(double dt) {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Joystick::isButtonPressed(0, 0)) {
 		if (ents.size()) {
 			auto mainChar = ents[0];
-			if (mainChar && !mainChar->jumping) {
+			if (mainChar && !mainChar->jumping && !mainChar->reloading && !hasCollision(mainChar->cx, mainChar->cy - 1)) {
 				mainChar->dy -= 40;
 				mainChar->setJumping(true);
 			}
@@ -193,15 +217,20 @@ void Game::pollInput(double dt) {
 	else {
 		wasPressed = false;
 	}
+
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
+	{
+		if (!getPlayer().jumping) getPlayer().fire();
+	}
 	
 	// Crouch
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl)) {
-		if (ents.size()) {
+		/*if (ents.size()) {
 			auto mainChar = ents[0];
 			if (mainChar) {
 				mainChar->crouch();
 			}
-		}
+		}*/
 	}
 }
 
@@ -221,6 +250,9 @@ void Game::update(double dt) {
 	pollInput(dt);
 
 	g_time += dt;
+	bg.setOrigin(bg.getSize().x / 2, bg.getSize().y / 2);
+	bg.setPosition(cameraView.getCenter());
+	bg.setSize(Vector2f(C::RES_X * zoom, C::RES_Y * zoom));
 
 	for (auto e : ents) 
 		e->update(dt);
@@ -261,38 +293,36 @@ void Game::onSpacePressed() {
 	// augmenter la hauteur du saut
 }
 
-bool Game::hasCollision(float gridx, float gridy, int width, int height)
+bool Game::hasCollision(int gx, int gy)
 {
 	// can't go left too much
-	if (gridx < 0)
+	if (gx < 0)
 		return true;
 
 	// can't go right too much
 	auto wallRightX = (C::RES_X / C::GRID_SIZE);
-	if (gridx >= wallRightX)
+	if (gx >= wallRightX)
 		return true;
 
 	// check collision with wall
-	return isWall(gridx, gridy, width, height);
+	return isWall(gx, gy);
 }
 
-bool Game::isWall(float cx, float cy, int width, int height){
+bool Game::isWall(int cx, int cy){
 	for (Vector2i & w : walls)
 	{
-		if((w.x == (int)cx || w.x == (int)(cx - width/2) || w.x == (int)(cx + width/2))	&&	(w.y == (int)(cy - height) || w.y == (int)cy || w.y == (int)(cy - height / 2)))
-			return true;
+		if (w.x == cx && (w.y == cy ||w.y == cy - 1)) return true;
 	}
 	return false;
 }
 
-void Game::removeWallAtPosition(float cx, float cy)
+void Game::removeWallAtPosition(int cx, int cy)
 {
-	printf("check if there is wall in (%f , %f)", cx, cy);
 	bool hasWallHere = false;
 	std::vector<sf::Vector2i> newWalls;
 	for (Vector2i & w : walls)
 	{
-		if ((int)cx == w.x && (int)cy == w.y) hasWallHere = true;
+		if (cx == w.x && cy == w.y) hasWallHere = true;
 		else newWalls.push_back(w);
 	}
 	if (!hasWallHere) walls.push_back(Vector2i(cx, cy));
@@ -337,6 +367,7 @@ Entity& Game::getPlayer() const
 {
 	return *ents[0];
 }
+
 
 
 

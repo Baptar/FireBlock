@@ -18,13 +18,14 @@ class HotReloadShader;
 class Game {
 public:
 	sf::RenderWindow*				win = nullptr;
-	float							zoom = 0.55f;
+	float							zoom = 0.28f;
 	float							f = 0.7f;
 	float							z = 0.78f;
 	float							r = 0.0f;
 	sf::View						cameraView;
 	
 	sf::RectangleShape				bg;
+	sf::RectangleShape				bg2;
 	HotReloadShader *				bgShader = nullptr;
 
 	sf::Texture						tex;
@@ -49,18 +50,18 @@ public:
 	void pollInput(double dt);
 	void onSpacePressed();
 
-	bool hasCollision(float gx, float gy, int width, int height);
+	bool hasCollision(int gx, int gy);
 
 	void update(double dt);
 
 	void draw(sf::RenderWindow& win);
 
-	bool isWall(float gx, float gy, int width, int height);
-	void removeWallAtPosition(float cx, float cy);
+	bool isWall(int gx, int gy);
+	void removeWallAtPosition(int cx, int cy);
 	void im();
 
 	void saveData(int cx, int cy);
 	void loadData();
 
-	Entity& getPlayer() const;	
+	Entity& getPlayer() const;
 };

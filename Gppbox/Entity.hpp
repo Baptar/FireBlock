@@ -8,7 +8,23 @@ namespace sf {
 
 class Entity{
 public:
+	sf::Sprite sprite;
+	sf::Texture textureIdle;
+	sf::Texture textureWalk;
+	sf::Texture textureRun;
+	sf::Texture textureJump0;
+	sf::Texture textureJump1;
+	sf::Texture textureJump2;
+	sf::Texture textureHurt;
+	sf::Texture textureFire;
+	sf::Texture textureReload;
+	sf::Texture textureDeath;
+	sf::Texture textureRunShot;
+	
+	
 	sf::RectangleShape * spr = 0;
+
+	int			numberOfFrame = 6;
 	int			cx = 0;
 	int			cy = 0;
 	float		rx = 0.5f;
@@ -23,6 +39,14 @@ public:
 
 	float		frx = 0.88f;
 	float		fry = 1.0f;
+
+	int			currentFrame = 0;   
+	float		animationTime = 0;  
+	float		frameSpeed = 0.1f;
+	int			animationRow = 0; // 0 = idle, 1 = walk, 2 = run, 3 = jump
+
+	bool		reloading = false;
+	bool		firing = false;
 	bool		jumping = false;
 	bool		crouching = false;
 	bool		waitToUncrouch = false;
@@ -42,13 +66,14 @@ public:
 	bool			im();
 
 	sf::Vector2i	getPosPixel();
-
+	void			setAnimationFrame(int frame, int animationRow);
+	
 	void			setJumping(bool onOff);
 	void			crouch();
 	void			unCrouch();
 	void			setCrouch(bool onOff);
-
-	void			setPlayerVelocity(double dt);
-	void			setPlayerAcceleration(double dt);
+	void 			stopFire();
+	void			fire();
+	void			reload();
 	
 };

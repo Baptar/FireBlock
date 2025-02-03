@@ -44,7 +44,7 @@ int main()
 {
 #pragma region Initialization
     sf::RenderWindow window(sf::VideoMode(C::RES_X, C::RES_Y,32), "SFML works!", sf::Style::Fullscreen);
-	window.setVerticalSyncEnabled(true);
+	window.setVerticalSyncEnabled(false);
 	
 	Font font;
 
@@ -109,7 +109,7 @@ int main()
 	destFinal->create(window.getSize().x, window.getSize().y);
 	destFinal->clear(sf::Color(0, 0, 0, 0));	
 
-	float bloomWidth = 12;
+	float bloomWidth = 0 ;
 	sf::Glsl::Vec4 bloomMul(1,1,1,0.8f);
 #pragma endregion
 	
@@ -171,11 +171,13 @@ int main()
 			ImGui::ColorEdit4("bloomMul2", &bloomMul.x);
 		}
 		#pragma endregion
+
+    	
     	
     	g.update(dt);
     	g.cameraView = v;
 		g.im();
-        g.draw(window);
+    	g.draw(window);
 		window.draw(fpsCounter);
 
     	// Bloom Management
@@ -204,7 +206,7 @@ int main()
 		frameEnd = Lib::getTimeStamp();
 		fpsCounter.setString("FPS: "+std::to_string(1.0 / dt));
 		ImGui::EndFrame();
-		
+    	
 		curDts++;
 		if (curDts >= dts.size()) {
 			curDts = 0;
