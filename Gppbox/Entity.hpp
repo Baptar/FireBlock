@@ -38,7 +38,7 @@ public:
 	float		width = 0.f;
 
 	float		frx = 0.88f;
-	float		fry = 1.0f;
+	float		fry = 0.95f;
 
 	int			currentFrame = 0;   
 	float		animationTime = 0;  

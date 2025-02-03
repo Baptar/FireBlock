@@ -42,10 +42,8 @@ static int curDts = 0;
 
 int main()
 {
-#pragma region Initialization
     sf::RenderWindow window(sf::VideoMode(C::RES_X, C::RES_Y,32), "SFML works!", sf::Style::Fullscreen);
 	window.setVerticalSyncEnabled(false);
-	
 	Font font;
 
 	// load font
@@ -85,17 +83,16 @@ int main()
 	Vector2f viewCenter = v.getCenter();
 	float zoom = g.zoom;
 	v.zoom(zoom);
-#pragma endregion
+
+	sf::Clock timer;
 	
-#pragma region FPS
 	sf::Text fpsCounter;
 	fpsCounter.setFont(font);
 	fpsCounter.setString("FPS:");
+	
 	double frameStart = 0.0;
 	double frameEnd = 0.0;
-#pragma endregion
 
-#pragma region Bloom
 	sf::Texture winTex;
 	winTex.create(window.getSize().x, window.getSize().y);
 	
@@ -111,7 +108,7 @@ int main()
 
 	float bloomWidth = 0 ;
 	sf::Glsl::Vec4 bloomMul(1,1,1,0.8f);
-#pragma endregion
+
 	
     while (window.isOpen())
     {
@@ -124,8 +121,7 @@ int main()
 		{
 			ImGui::SFML::ProcessEvent(event);
 			g.processInput(event);
-
-			#pragma region ResizeWindow
+			
 			if (event.type == sf::Event::Resized) {
 				auto nsz = window.getSize();
 				winTex.create(window.getSize().x, window.getSize().y);
@@ -139,12 +135,13 @@ int main()
 				v = sf::View(Vector2f(nsz.x * 0.5f, nsz.y * 0.5f), Vector2f((float)nsz.x, (float)nsz.y));
 				viewCenter = v.getCenter();
 			}
-			#pragma endregion
 		}		
-
-		#pragma region ImGui
+    	
     	//don't use imgui before this;
     	ImGui::SFML::Update(window, sf::seconds((float)dt));
+
+		
+    	
 		if (ImGui::CollapsingHeader("View")) {
 			auto sz = v.getSize();
 			ImGui::Value("size x", sz.x);
@@ -164,15 +161,11 @@ int main()
 			ImGui::LabelText("Avg Update Time", "%0.6f", captureMdt);
 			ImGui::LabelText("Avg FPS", "%0.6f", 1.0 / captureMdt);
 		}
-
 		if (ImGui::CollapsingHeader("Bloom Control")) {
 			ImGui::SliderFloat("bloomWidth", &bloomWidth, 0, 55);//55 is max acceptable kernel size for constants, otherwise we should use a texture
 			ImGui::ColorEdit4("bloomMul", &bloomMul.x);
 			ImGui::ColorEdit4("bloomMul2", &bloomMul.x);
-		}
-		#pragma endregion
-
-    	
+		}    	
     	
     	g.update(dt);
     	g.cameraView = v;
@@ -188,8 +181,7 @@ int main()
     		window.setView(window.getDefaultView());
     		Bloom::render(window,winTex,destX,destFinal,&blurShader->sh,&bloomShader->sh, bloomWidth, bloomMul);
     	}
-
-		#pragma region Camera
+    	
     	float posXDiff = 100;
     	float posYDiff = player.crouching ? 20 : 0;
     	if (player.moveRight) posXDiff *= -1;
@@ -199,7 +191,6 @@ int main()
     	v.zoom(g.zoom / zoom);
     	zoom = g.zoom;
     	window.setView(v);//keep view up to date in case we want to do something with like... you know what.
-		#pragma endregion
     	
 		ImGui::SFML::Render(window);
         window.display();

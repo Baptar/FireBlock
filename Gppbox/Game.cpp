@@ -103,16 +103,21 @@ void Game::processInput(sf::Event ev) {
 			cacheWalls();
 		}
 
-		if (ev.key.code == sf::Keyboard::LControl)
+		/*if (ev.key.code == sf::Keyboard::LControl)
 		{
-			/*auto mainChar = ents[0];
+			auto mainChar = ents[0];
 			if (mainChar) {
 				mainChar->unCrouch();
-			}*/
-		}
+			}
+		}*/
 
 		if (ev.key.code == Keyboard::R) {
 			getPlayer().reload();
+		}
+		
+		if (ev.key.code == sf::Keyboard::Space)
+		{
+			getPlayer().gravy = 120.0f;
 		}
 	}
 	if (ev.type == sf::Event::JoystickButtonReleased)
@@ -151,10 +156,6 @@ void Game::processInput(sf::Event ev) {
 			removeWallAtPosition((int)(mousePosWorld.x/ C::GRID_SIZE), (int)(mousePosWorld.y/ C::GRID_SIZE));
 			cacheWalls();
 		}
-	}
-	
-	if (ev.type == sf::Event::MouseButtonReleased)
-	{
 		if (ev.mouseButton.button == sf::Mouse::Right)
 		{
 			printf("Stop Fire\n");
@@ -173,7 +174,7 @@ static double g_tickTimer = 0.0;
 
 void Game::pollInput(double dt) {
 	
-	float lateralSpeed = 20.0;
+	float lateralSpeed = 10.0;
 	float maxSpeed = 40.0;
 
 	// Move Left
@@ -290,7 +291,7 @@ void Game::update(double dt) {
 }
 
 void Game::onSpacePressed() {
-	// augmenter la hauteur du saut
+	printf("SPACE Start \n");
 }
 
 bool Game::hasCollision(int gx, int gy)

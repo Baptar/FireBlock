@@ -41,9 +41,8 @@ void Entity::update(double dt){
 	// Check not moving
 	if (dx <= 2.0f && dx >= -2.0f && dy<= 2.0f && (animationRow == 1 || animationRow == 2 || animationRow == 10) && !jumping)
 	{
-		if (firing && animationRow!=10) setAnimationFrame(0, 10);
-		else if (!firing && animationRow != 2) setAnimationFrame(0, 2);
-		setAnimationFrame(0,0);
+		if (firing && animationRow!=6) setAnimationFrame(0, 6);
+		else if (!firing && animationRow != 0) setAnimationFrame(0, 0);
 	}
 	
 	animationTime += dt;
@@ -377,7 +376,8 @@ void Entity::stopFire()
 {
 	if (!firing) return;
 	firing = false;
-	setAnimationFrame(0, 0);
+	if (dx > 2.0f || dx < -2.0f) setAnimationFrame(currentFrame + 1, 2);
+	else setAnimationFrame(0, 0);
 }
 
 void Entity::fire()
@@ -386,9 +386,9 @@ void Entity::fire()
 	
 	// Start Fire System
 	firing = true;
-	setAnimationFrame(0, 6);
+	if (dx > 2.0f || dx < -2.0f) setAnimationFrame(currentFrame + 1, 10);
+	else setAnimationFrame(0, 6);
 	printf("fire\n");
-	
 }
 
 void Entity::reload()
