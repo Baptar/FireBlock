@@ -31,6 +31,7 @@ Game::Game(sf::RenderWindow * win) {
 	if (!isOk) {
 		printf("ERR : LOAD FAILED\n");
 	}
+	if (!textureWall.loadFromFile("res/Tile_36.png")) printf("ERR : LOAD FAILED\n");
 	bg.setTexture(&tex);
 	bg.setSize(sf::Vector2f(C::RES_X, C::RES_Y));
 
@@ -81,10 +82,12 @@ void Game::initMainChar(){
 void Game::cacheWalls(){
 	wallSprites.clear();
 	for (Vector2i & w : walls) {
-		sf::RectangleShape rect(Vector2f(16,16));
-		rect.setPosition((float)w.x * C::GRID_SIZE, (float)w.y * C::GRID_SIZE);
-		rect.setFillColor(sf::Color(0x07ff07ff));
-		wallSprites.push_back(rect);
+		sf::Sprite s;
+		s.setTexture(textureWall);
+		//s.setTextureRect(sf::IntRect(0, 0, 16, 16));
+		s.setScale(sf::Vector2f(1.0f, 1.0f));
+		s.setPosition((float)w.x * C::GRID_SIZE, (float)w.y * C::GRID_SIZE);
+		wallSprites.push_back(s);
 	}
 }
 
@@ -148,10 +151,8 @@ void Game::processInput(sf::Event ev) {
 		if (ev.mouseButton.button == sf::Mouse::Left
 		/*&& ImGui::IsWindowHovered()*/)
 		{
-			printf("mouse left\n");
 			Vector2i mousePositionWindow = sf::Mouse::getPosition(*win);
 			sf::Vector2f mousePosWorld = win->mapPixelToCoords(mousePositionWindow, cameraView);
-			//walls.push_back(Vector2i(mousePosWorld.x/ C::GRID_SIZE, mousePosWorld.y/ C::GRID_SIZE));
 
 			removeWallAtPosition((int)(mousePosWorld.x/ C::GRID_SIZE), (int)(mousePosWorld.y/ C::GRID_SIZE));
 			cacheWalls();
@@ -278,9 +279,14 @@ void Game::update(double dt) {
 
 	beforeParts.draw(win);
 
-	for (sf::RectangleShape & r : wallSprites)
-		win.draw(r);
-
+	/*for (sf::RectangleShape & r : wallSprites)
+		win.draw(r);*/
+	
+	for (sf::Sprite& s : wallSprites)
+	{
+		win.draw(s);
+	}
+	
 	for (sf::RectangleShape& r : rects) 
 		win.draw(r);
 	

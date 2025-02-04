@@ -17,6 +17,7 @@ class Entity;
 class HotReloadShader;
 class Game {
 public:
+	sf::Texture						textureWall;
 	sf::RenderWindow*				win = nullptr;
 	float							zoom = 0.28f;
 	float							f = 0.7f;
@@ -33,7 +34,7 @@ public:
 	bool							closing = false;
 	
 	std::vector<sf::Vector2i>		walls;
-	std::vector<sf::RectangleShape> wallSprites;
+	std::vector<sf::Sprite>			wallSprites;
 	std::vector<Entity*>			ents;
 
 	ParticleMan beforeParts;
