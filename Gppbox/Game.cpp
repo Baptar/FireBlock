@@ -120,7 +120,7 @@ void Game::processInput(sf::Event ev) {
 		
 		if (ev.key.code == sf::Keyboard::Space)
 		{
-			getPlayer().gravy = 120.0f;
+			//getPlayer().gravy = 120.0f;
 		}
 	}
 	if (ev.type == sf::Event::JoystickButtonReleased)
