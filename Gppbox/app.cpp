@@ -77,7 +77,7 @@ int main()
 	Player& player = g.getPlayer();
 	
 	// init Camera
-	sf::Vector2f cameraPos ={ 0 , 0};
+	sf::Vector2f cameraPos = { 0 , 0};
 	SecondOrderDynamics cameraDynamic(g.f, g.z, g.r, cameraPos);
 	View v = window.getDefaultView();
 	Vector2f viewCenter = v.getCenter();
@@ -119,6 +119,11 @@ int main()
 		sf::Event event;
 		while (window.pollEvent(event))//sort un evenement de la liste pour le traiter
 		{
+			if (event.key.code == sf::Keyboard::L)
+			{
+				cameraDynamic.startShake(1.0f, 0.2f, 0.2f);
+				printf("start Shake\n");
+			}
 			ImGui::SFML::ProcessEvent(event);
 			g.processInput(event);
 			
