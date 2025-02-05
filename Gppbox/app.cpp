@@ -139,8 +139,6 @@ int main()
     	
     	//don't use imgui before this;
     	ImGui::SFML::Update(window, sf::seconds((float)dt));
-
-		
     	
 		if (ImGui::CollapsingHeader("View")) {
 			auto sz = v.getSize();
@@ -184,14 +182,13 @@ int main()
     	if (!g.isEditing)
     	{
     		float posXDiff = 100;
-                	float posYDiff = player.crouching ? 20 : 0;
-                	if (player.moveRight) posXDiff *= -1;
-                	cameraDynamic.setParams(g.f, g.z, g.r);
-                	cameraPos = cameraDynamic.Update(dt,{ (float)player.getPosPixel().x - posXDiff,(float) player.getPosPixel().y + posYDiff});
-                	v.setCenter(cameraPos);
-                	v.zoom(g.zoom / zoom);
-                	zoom = g.zoom;
-                	window.setView(v);//keep view up to date in case we want to do something with like... you know what.
+    		if (player.moveRight) posXDiff *= -1;
+    		cameraDynamic.setParams(g.f, g.z, g.r);
+    		cameraPos = cameraDynamic.Update(dt,{ (float)player.getPosPixel().x - posXDiff,(float) player.getPosPixel().y});
+    		v.setCenter(cameraPos);
+    		v.zoom(g.zoom / zoom);
+    		zoom = g.zoom;
+    		window.setView(v);//keep view up to date in case we want to do something with like... you know what.
     	}
 	    else
 	    {

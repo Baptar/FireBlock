@@ -8,6 +8,7 @@
 Ennemy::Ennemy(int _cx, int _cy): spriteEnnemy(SpriteEnnemy(*this))
 {
 	setCooGrid(_cx, _cy);
+	speedX = Dice::randFloat(speedXMin, speedXMax);
 }
 
 void Ennemy::update(double _dt)
@@ -20,7 +21,7 @@ void Ennemy::update(double _dt)
 
 	dy += gravy * _dt;
 	dy = dy * pow(fry, dfr);
-	dx = (moveRight ?  15 : -15) * pow(frx, dfr);
+	dx = (moveRight ?  speedX : -speedX) * pow(frx, dfr);
 
 	rx += dx * _dt;
 	ry += dy * _dt;
