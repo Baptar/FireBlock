@@ -67,7 +67,7 @@ int main()
 	sound.setBuffer(buffer);
 	sound.setVolume(20);
 	sound.setLoop(true);
-	sound.play();
+	//sound.play();
 
 	// init ImGui SFML
 	ImGui::SFML::Init(window);
@@ -181,16 +181,23 @@ int main()
     		window.setView(window.getDefaultView());
     		Bloom::render(window,winTex,destX,destFinal,&blurShader->sh,&bloomShader->sh, bloomWidth, bloomMul);
     	}
+    	if (!g.isEditing)
+    	{
+    		float posXDiff = 100;
+                	float posYDiff = player.crouching ? 20 : 0;
+                	if (player.moveRight) posXDiff *= -1;
+                	cameraDynamic.setParams(g.f, g.z, g.r);
+                	cameraPos = cameraDynamic.Update(dt,{ (float)player.getPosPixel().x - posXDiff,(float) player.getPosPixel().y + posYDiff});
+                	v.setCenter(cameraPos);
+                	v.zoom(g.zoom / zoom);
+                	zoom = g.zoom;
+                	window.setView(v);//keep view up to date in case we want to do something with like... you know what.
+    	}
+	    else
+	    {
+		    window.setView(window.getDefaultView());
+	    }
     	
-    	float posXDiff = 100;
-    	float posYDiff = player.crouching ? 20 : 0;
-    	if (player.moveRight) posXDiff *= -1;
-    	cameraDynamic.setParams(g.f, g.z, g.r);
-    	cameraPos = cameraDynamic.Update(dt,{ (float)player.getPosPixel().x - posXDiff,(float) player.getPosPixel().y + posYDiff});
-    	v.setCenter(cameraPos);
-    	v.zoom(g.zoom / zoom);
-    	zoom = g.zoom;
-    	window.setView(v);//keep view up to date in case we want to do something with like... you know what.
     	
 		ImGui::SFML::Render(window);
         window.display();

@@ -198,6 +198,9 @@
     <ClInclude Include="ParticleMan.hpp" />
     <ClInclude Include="sys.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="save.sav" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

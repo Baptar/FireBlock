@@ -7,6 +7,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 #include "Entity.hpp"
 
@@ -25,13 +26,20 @@ Game::Game(sf::RenderWindow * win) {
 	this->win = win;
 	me = this;
 	bg = sf::RectangleShape(Vector2f((float)win->getSize().x, (float)win->getSize().y));
-	bg2= sf::RectangleShape(Vector2f((float)win->getSize().x, (float)win->getSize().y));
 
 	bool isOk = tex.loadFromFile("res/night.png");
 	if (!isOk) {
 		printf("ERR : LOAD FAILED\n");
 	}
-	if (!textureWall.loadFromFile("res/Tile_36.png")) printf("ERR : LOAD FAILED\n");
+	if (!textureWall_x0Diag.loadFromFile("res/wall_x4Diag.png")) printf("ERR : LOAD FAILED\n");
+	if (!textureWall_x02Diag.loadFromFile("res/wall_x0_2Diag.png")) printf("ERR : LOAD FAILED\n");
+	if (!textureWall_x0.loadFromFile("res/wall_x0.png")) printf("ERR : LOAD FAILED\n");
+	if (!textureWall_x1.loadFromFile("res/wall_x1.png")) printf("ERR : LOAD FAILED\n");
+	if (!textureWall_x2.loadFromFile("res/wall_x2.png")) printf("ERR : LOAD FAILED\n");
+	if (!textureWall_x2Mid.loadFromFile("res/wall_x2mid.png")) printf("ERR : LOAD FAILED\n");
+	if (!textureWall_x3.loadFromFile("res/wall_x3.png")) printf("ERR : LOAD FAILED\n");
+	if (!textureWall_x4.loadFromFile("res/wall_x4.png")) printf("ERR : LOAD FAILED\n");
+	
 	bg.setTexture(&tex);
 	bg.setSize(sf::Vector2f(C::RES_X, C::RES_Y));
 
@@ -40,8 +48,11 @@ Game::Game(sf::RenderWindow * win) {
 
 	bgShader = new HotReloadShader("res/bg.vert", "res/bg.frag");
 	
-	for (int i = 0; i < C::RES_X / C::GRID_SIZE; ++i) 
+	for (int i = 0; i < C::RES_X / C::GRID_SIZE; ++i)
+	{
 		walls.push_back( Vector2i(i, lastLine) );
+		walls.push_back( Vector2i(i, lastLine+1) );
+	}
 
 	// Left Wall
 	walls.push_back(Vector2i(0, lastLine-1));
@@ -81,14 +92,203 @@ void Game::initMainChar(){
 
 void Game::cacheWalls(){
 	wallSprites.clear();
+	bool collisionTop;
+	bool collisionBottom;
+	bool collisionLeft;
+	bool collisionRight;
+	bool collisionTopLeft;
+	bool collisionTopRight;
+	bool collisionBottomLeft;
+	bool collisionBottomRight;
 	for (Vector2i & w : walls) {
 		sf::Sprite s;
-		s.setTexture(textureWall);
-		//s.setTextureRect(sf::IntRect(0, 0, 16, 16));
-		s.setScale(sf::Vector2f(1.0f, 1.0f));
-		s.setPosition((float)w.x * C::GRID_SIZE, (float)w.y * C::GRID_SIZE);
+		
+		collisionTop = hasWall(w.x, w.y - 1);
+		collisionBottom = hasWall(w.x, w.y + 1);
+		collisionLeft = hasWall(w.x - 1, w.y);
+		collisionRight = hasWall(w.x + 1, w.y);
+
+		collisionTopLeft = hasWall(w.x -1 , w.y - 1);
+		collisionTopRight = hasWall(w.x + 1, w.y - 1);
+		collisionBottomLeft = hasWall(w.x - 1, w.y + 1);
+		collisionBottomRight = hasWall(w.x + 1, w.y + 1);
+		
+		// x3
+		if (!collisionTop && collisionBottom && !collisionLeft && !collisionRight)
+		{
+			s.setTexture(textureWall_x3);
+			s.setPosition(float(w.x * C::GRID_SIZE), float(w.y * C::GRID_SIZE));
+		}
+		else if (!collisionTop && !collisionBottom && collisionLeft && !collisionRight)
+		{
+			s.setTexture(textureWall_x3);
+			sf::FloatRect bounds = s.getLocalBounds();
+			s.setOrigin(bounds.width / 2, bounds.height / 2);
+			s.setPosition(w.x * C::GRID_SIZE + bounds.width / 2, w.y * C::GRID_SIZE + bounds.height / 2);
+			s.setRotation(90);
+		}
+		else if (collisionTop && !collisionBottom && !collisionLeft && !collisionRight)
+		{
+			s.setTexture(textureWall_x3);
+			sf::FloatRect bounds = s.getLocalBounds();
+			s.setOrigin(bounds.width / 2, bounds.height / 2);
+			s.setPosition(w.x * C::GRID_SIZE + bounds.width / 2, w.y * C::GRID_SIZE + bounds.height / 2);
+			s.setRotation(180);
+		}
+		else if (!collisionTop && !collisionBottom && !collisionLeft && collisionRight)
+		{
+			s.setTexture(textureWall_x3);
+			sf::FloatRect bounds = s.getLocalBounds();
+			s.setOrigin(bounds.width / 2, bounds.height / 2);
+			s.setPosition(w.x * C::GRID_SIZE + bounds.width / 2, w.y * C::GRID_SIZE + bounds.height / 2);
+			s.setRotation(270);
+		}
+		
+		// x2
+		else if (!collisionTop && collisionBottom && !collisionLeft && collisionRight)
+		{
+			s.setTexture(textureWall_x2);
+			s.setPosition(float(w.x * C::GRID_SIZE), float(w.y * C::GRID_SIZE));
+		}
+		else if (!collisionTop && collisionBottom && collisionLeft && !collisionRight)
+		{
+			s.setTexture(textureWall_x2);
+			sf::FloatRect bounds = s.getLocalBounds();
+			s.setOrigin(bounds.width / 2, bounds.height / 2);
+			s.setPosition(w.x * C::GRID_SIZE + bounds.width / 2, w.y * C::GRID_SIZE + bounds.height / 2);
+			s.setRotation(90);
+		}
+		else if (collisionTop && !collisionBottom && collisionLeft && !collisionRight)
+		{
+			s.setTexture(textureWall_x2);
+			sf::FloatRect bounds = s.getLocalBounds();
+			s.setOrigin(bounds.width / 2, bounds.height / 2);
+			s.setPosition(w.x * C::GRID_SIZE + bounds.width / 2, w.y * C::GRID_SIZE + bounds.height / 2);
+			s.setRotation(180);
+		}
+		else if (collisionTop && !collisionBottom && !collisionLeft && collisionRight)
+		{
+			s.setTexture(textureWall_x2);
+			sf::FloatRect bounds = s.getLocalBounds();
+			s.setOrigin(bounds.width / 2, bounds.height / 2);
+			s.setPosition(w.x * C::GRID_SIZE + bounds.width / 2, w.y * C::GRID_SIZE + bounds.height / 2);
+			s.setRotation(270);
+		}
+		// x2 Mid
+		else if (!collisionTop && !collisionBottom && collisionLeft && collisionRight)
+		{
+			s.setTexture(textureWall_x2Mid);
+			s.setPosition(float(w.x * C::GRID_SIZE), float(w.y * C::GRID_SIZE));
+		}
+		else if (collisionTop && collisionBottom && !collisionLeft && !collisionRight)
+		{
+			s.setTexture(textureWall_x2Mid);
+			sf::FloatRect bounds = s.getLocalBounds();
+			s.setOrigin(bounds.width / 2, bounds.height / 2);
+			s.setPosition(w.x * C::GRID_SIZE + bounds.width / 2, w.y * C::GRID_SIZE + bounds.height / 2);
+			s.setRotation(90);
+		}
+		// x1
+		else if (!collisionTop && collisionBottom && collisionLeft && collisionRight)
+		{
+			s.setTexture(textureWall_x1);
+			s.setPosition(float(w.x * C::GRID_SIZE), float(w.y * C::GRID_SIZE));
+		}
+		else if (collisionTop && collisionBottom && collisionLeft && !collisionRight)
+		{
+			s.setTexture(textureWall_x1);
+			sf::FloatRect bounds = s.getLocalBounds();
+			s.setOrigin(bounds.width / 2, bounds.height / 2);
+			s.setPosition(w.x * C::GRID_SIZE + bounds.width / 2, w.y * C::GRID_SIZE + bounds.height / 2);
+			s.setRotation(90);
+		}
+		else if (collisionTop && !collisionBottom && collisionLeft && collisionRight)
+		{
+			s.setTexture(textureWall_x1);
+			sf::FloatRect bounds = s.getLocalBounds();
+			s.setOrigin(bounds.width / 2, bounds.height / 2);
+			s.setPosition(w.x * C::GRID_SIZE + bounds.width / 2, w.y * C::GRID_SIZE + bounds.height / 2);
+			s.setRotation(180);
+		}
+		else if (collisionTop && collisionBottom && !collisionLeft && collisionRight)
+		{
+			s.setTexture(textureWall_x1);
+			sf::FloatRect bounds = s.getLocalBounds();
+			s.setOrigin(bounds.width / 2, bounds.height / 2);
+			s.setPosition(w.x * C::GRID_SIZE + bounds.width / 2, w.y * C::GRID_SIZE + bounds.height / 2);
+			s.setRotation(270);
+		}
+		// x0
+		else if (collisionTop && collisionBottom && collisionLeft && collisionRight)
+		{
+			if (collisionTopLeft && collisionTopRight && collisionBottomRight && !collisionBottomLeft)
+			{
+				s.setTexture(textureWall_x0Diag);
+				sf::FloatRect bounds = s.getLocalBounds();
+				s.setOrigin(bounds.width / 2, bounds.height / 2);
+				s.setPosition(w.x * C::GRID_SIZE + bounds.width / 2, w.y * C::GRID_SIZE + bounds.height / 2);
+				s.setRotation(90);
+			}
+			else if (collisionTopLeft && collisionTopRight && !collisionBottomRight && collisionBottomLeft)
+			{
+				s.setTexture(textureWall_x0Diag);
+				s.setPosition(float(w.x * C::GRID_SIZE), float(w.y * C::GRID_SIZE));
+			}
+			else if (collisionTopLeft && !collisionTopRight && collisionBottomRight && collisionBottomLeft)
+			{
+				s.setTexture(textureWall_x0Diag);
+				sf::FloatRect bounds = s.getLocalBounds();
+				s.setOrigin(bounds.width / 2, bounds.height / 2);
+				s.setPosition(w.x * C::GRID_SIZE + bounds.width / 2, w.y * C::GRID_SIZE + bounds.height / 2);
+				s.setRotation(270);
+			}
+			else if (!collisionTopLeft && collisionTopRight && collisionBottomRight && collisionBottomLeft)
+			{
+				s.setTexture(textureWall_x0Diag);
+				sf::FloatRect bounds = s.getLocalBounds();
+				s.setOrigin(bounds.width / 2, bounds.height / 2);
+				s.setPosition(w.x * C::GRID_SIZE + bounds.width / 2, w.y * C::GRID_SIZE + bounds.height / 2);
+				s.setRotation(180);
+			}
+			else if (!collisionTopLeft && collisionTopRight && !collisionBottomRight && collisionBottomLeft)
+			{
+				s.setTexture(textureWall_x02Diag);
+				s.setPosition(float(w.x * C::GRID_SIZE), float(w.y * C::GRID_SIZE));
+			}
+			else if (collisionTopLeft && !collisionTopRight && collisionBottomRight && !collisionBottomLeft)
+			{
+				s.setTexture(textureWall_x02Diag);
+				sf::FloatRect bounds = s.getLocalBounds();
+				s.setOrigin(bounds.width / 2, bounds.height / 2);
+				s.setPosition(w.x * C::GRID_SIZE + bounds.width / 2, w.y * C::GRID_SIZE + bounds.height / 2);
+				s.setRotation(90);
+			}
+			else if (collisionTopLeft && !collisionTopRight && collisionBottomRight && !collisionBottomLeft)
+			{
+				s.setTexture(textureWall_x02Diag);
+				sf::FloatRect bounds = s.getLocalBounds();
+				s.setOrigin(bounds.width / 2, bounds.height / 2);
+				s.setPosition(w.x * C::GRID_SIZE + bounds.width / 2, w.y * C::GRID_SIZE + bounds.height / 2);
+				s.setRotation(90);
+			}
+			else
+			{
+				s.setTexture(textureWall_x0);
+				s.setPosition(float(w.x * C::GRID_SIZE), float(w.y * C::GRID_SIZE));
+			}
+		}
+		// x0
+		else
+		{
+			s.setTexture(textureWall_x4);
+			s.setPosition(float(w.x * C::GRID_SIZE), float(w.y * C::GRID_SIZE));
+		}
 		wallSprites.push_back(s);
 	}
+}
+
+void Game::cacheEnnemies()
+{
 }
 
 void Game::processInput(sf::Event ev) {
@@ -148,15 +348,6 @@ void Game::processInput(sf::Event ev) {
 	}
 	if (ev.type == sf::Event::MouseButtonReleased)
 	{
-		if (ev.mouseButton.button == sf::Mouse::Left
-		/*&& ImGui::IsWindowHovered()*/)
-		{
-			Vector2i mousePositionWindow = sf::Mouse::getPosition(*win);
-			sf::Vector2f mousePosWorld = win->mapPixelToCoords(mousePositionWindow, cameraView);
-
-			removeWallAtPosition((int)(mousePosWorld.x/ C::GRID_SIZE), (int)(mousePosWorld.y/ C::GRID_SIZE));
-			cacheWalls();
-		}
 		if (ev.mouseButton.button == sf::Mouse::Right)
 		{
 			printf("Stop Fire\n");
@@ -202,7 +393,7 @@ void Game::pollInput(double dt) {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Joystick::isButtonPressed(0, 0)) {
 		if (ents.size()) {
 			auto mainChar = ents[0];
-			if (mainChar && !mainChar->jumping && !mainChar->reloading && !hasCollision(mainChar->cx, mainChar->cy - 1)) {
+			if (mainChar && !mainChar->jumping && !mainChar->reloading && !hasPlayerCollision(mainChar->cx, mainChar->cy - 1)) {
 				mainChar->dy -= 40;
 				mainChar->setJumping(true);
 			}
@@ -222,7 +413,49 @@ void Game::pollInput(double dt) {
 
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
 	{
-		if (!getPlayer().jumping) getPlayer().fire();
+		if (isEditing && !ImGui::IsWindowHovered()
+		&& !ImGui::IsAnyItemHovered()
+		&& !ImGui::IsAnyItemActive()
+		&& !ImGui::IsAnyItemFocused())
+		{
+			int posX = (posMouse.x  / C::GRID_SIZE);
+			int posY = (posMouse.y / C::GRID_SIZE);
+			if (hasWall(posX, posY))
+			{
+				removeWallAtPosition(posX, posY);
+				cacheWalls();
+			}
+			else if (hasEnnemy(posX, posY))
+			{
+				//
+				cacheEnnemies();
+			}	
+		}
+		else if (!getPlayer().jumping) getPlayer().fire();
+	}
+
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Left)
+		&& !ImGui::IsWindowHovered()
+		&& !ImGui::IsAnyItemHovered()
+		&& !ImGui::IsAnyItemActive()
+		&& !ImGui::IsAnyItemFocused())
+	{
+		if (isEditing)
+		{
+			//sf::Vector2f mousePosWorld = win->mapPixelToCoords(mousePositionWindow, cameraView);
+			int posX = (posMouse.x  / C::GRID_SIZE);
+			int posY = (posMouse.y / C::GRID_SIZE);
+			if (!hasWall(posX, posY) && selectedElement == 0 && !hasPlayer(posX, posY))
+			{
+				addWall(posX, posY);
+				cacheWalls();
+			}
+			else if (!hasEnnemy(posX, posY) && selectedElement == 1 && !hasPlayer(posX, posY))
+			{
+				addEnnemy(posX, posY);
+				cacheEnnemies();
+			}	
+		}
 	}
 	
 	// Crouch
@@ -252,10 +485,25 @@ void Game::update(double dt) {
 	pollInput(dt);
 
 	g_time += dt;
-	bg.setOrigin(bg.getSize().x / 2, bg.getSize().y / 2);
-	bg.setPosition(cameraView.getCenter());
-	bg.setSize(Vector2f(C::RES_X * zoom, C::RES_Y * zoom));
-
+	if (!isEditing)
+	{
+		bg.setOrigin(bg.getSize().x / 2, bg.getSize().y / 2);
+		bg.setPosition(cameraView.getCenter());
+		bg.setSize(Vector2f(C::RES_X * zoom, C::RES_Y * zoom));
+	}
+	else
+	{
+		bg.setOrigin(win->getDefaultView().getCenter());
+		bg.setPosition(win->getDefaultView().getCenter());
+		bg.setSize(Vector2f(win->getSize().x, win->getSize().y));
+	}
+	
+	posMouse = sf::Mouse::getPosition(*win);
+	
+	if (isEditing)
+	{
+		
+	}	
 	for (auto e : ents) 
 		e->update(dt);
 
@@ -278,7 +526,6 @@ void Game::update(double dt) {
 	win.draw(bg, states);
 
 	beforeParts.draw(win);
-
 	/*for (sf::RectangleShape & r : wallSprites)
 		win.draw(r);*/
 	
@@ -300,27 +547,56 @@ void Game::onSpacePressed() {
 	printf("SPACE Start \n");
 }
 
-bool Game::hasCollision(int gx, int gy)
+bool Game::hasPlayerCollision(int cx, int cy)
 {
 	// can't go left too much
-	if (gx < 0)
+	if (cx < 0)
 		return true;
 
 	// can't go right too much
 	auto wallRightX = (C::RES_X / C::GRID_SIZE);
-	if (gx >= wallRightX)
+	if (cx >= wallRightX)
 		return true;
 
 	// check collision with wall
-	return isWall(gx, gy);
-}
-
-bool Game::isWall(int cx, int cy){
 	for (Vector2i & w : walls)
 	{
 		if (w.x == cx && (w.y == cy ||w.y == cy - 1)) return true;
 	}
 	return false;
+}
+
+bool Game::hasWall(int cx, int cy){
+	for (Vector2i & w : walls)
+	{
+		if (w.x == cx && w.y == cy) return true;
+	}
+	return false;
+}
+
+bool Game::hasEnnemy(int cx, int cy)
+{
+	for (auto e : ennemies)
+	{
+		if (e->cx == cx && (e->cy == cy ||e->cy == cy - 1)) return true;
+	}
+	return false;
+}
+
+bool Game::hasPlayer(int cx, int cy)
+{
+	return getPlayer().cx == cx && (getPlayer().cy == cy || getPlayer().cy - 1 == cy);
+}
+
+void Game::addWall(int cx, int cy)
+{
+	walls.push_back(Vector2i(cx, cy));
+}
+
+void Game::addEnnemy(int cx, int cy)
+{
+	Ennemy* ennemy = new Ennemy(cx, cy);
+	ennemies.push_back(ennemy);
 }
 
 void Game::removeWallAtPosition(int cx, int cy)
@@ -340,6 +616,18 @@ void Game::im(){
 	using namespace ImGui;
 	int hre = 0;
 
+	if (Button("save")) {
+		saveData("save.sav");
+	}
+	ImGui::SameLine();
+	if (Button("load")) {
+		loadData("save.sav");
+	}
+	ImGui::SameLine();
+	if (Checkbox("edit mode", &isEditing)) {
+
+	}
+	
 	if (TreeNodeEx("Walls", 0)) {
 		for (auto& w : walls) {
 			Value("x",w.x);
@@ -348,27 +636,74 @@ void Game::im(){
 		TreePop();
 
 	}
-	if (TreeNodeEx("Entities", ImGuiTreeNodeFlags_DefaultOpen)) {
+	if (TreeNodeEx("Ennemies", ImGuiTreeNodeFlags_DefaultOpen)) {
+		for (auto e : ennemies)
+			e->im();
+		TreePop();
+	}
+	if (TreeNodeEx("Player", ImGuiTreeNodeFlags_DefaultOpen)) {
 		for (auto e : ents)
 			e->im();
 		TreePop();
 	}
-	bool chg = false;
-	chg |= DragFloat("zoom", &zoom, 0.01f, -20,20);
-	chg |= DragFloat("f", &f, 0.01f, -20,20);
-	chg |= DragFloat("z", &z, 0.01f, -20,20);
-	chg |= DragFloat("r", &r, 0.01f, -20,20);
+	if (TreeNodeEx("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+		bool chg = false;
+		chg |= DragFloat("zoom", &zoom, 0.01f, -20,20);
+		chg |= DragFloat("f", &f, 0.01f, -20,20);
+		chg |= DragFloat("z", &z, 0.01f, -20,20);
+		chg |= DragFloat("r", &r, 0.01f, -20,20);
+		TreePop();
+	}
 }
 
-void Game::saveData(int cx, int cy)
+bool Game::loadData(const std::filesystem::path& filePath)
 {
+	if (!std::filesystem::exists(filePath)) return false;
+
+	std::ifstream in(filePath);
+
+	walls.clear();
+	for (auto e : ennemies)
+		delete e;
+	ennemies.clear();
+
 	
+	std::string line;
+	while (std::getline(in, line))
+	{
+		std::istringstream iss(line);
+		int x, y, type;
+		if (!(iss >> x >> y >> type)) { break; } // error
+
+		if (type == 0)
+		{
+			addWall(x, y);
+		}
+
+		if (type == 1)
+		{
+			addEnnemy(x, y);
+		}
+	}
+	cacheWalls();
+	cacheEnnemies();
+	return true;
 }
 
-void Game::loadData()
+void Game::saveData(const std::filesystem::path& filePath) const
 {
-	
+	std::ofstream out(filePath);
+
+	for (auto wall : walls)
+	{
+		out << wall.x << " " << wall.y << " " << 0<<"\n";
+	}
+	for (auto entt : ennemies)
+	{
+		out << entt->cx << " " << entt->cy << " " << 1<<"\n";
+	}
 }
+
 
 Entity& Game::getPlayer() const
 {

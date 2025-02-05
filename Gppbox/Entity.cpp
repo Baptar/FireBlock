@@ -73,7 +73,7 @@ void Entity::update(double dt){
 	// Collision Left
 	do
 	{
-		if (g.hasCollision(cx - 1 , cy) && rx < 0.5)
+		if (g.hasPlayerCollision(cx - 1 , cy) && rx < 0.5)
 		{
 			if (animationRow != 0 && !jumping && !firing && !reloading) setAnimationFrame(0, 0);
 			dx = 0;
@@ -95,7 +95,7 @@ void Entity::update(double dt){
 	// Collision Right
 	do
 	{
-		if (g.hasCollision(cx + 1, cy) && rx > 0.5)
+		if (g.hasPlayerCollision(cx + 1, cy) && rx > 0.5)
 		{
 			if (animationRow != 0 && !jumping && !firing && !reloading) setAnimationFrame(0, 0);
 			dx = 0;
@@ -119,7 +119,7 @@ void Entity::update(double dt){
 		// Collision when go up
 		do
 		{
-			if (g.hasCollision(cx, cy  - 2) && ry <= 0.01f)
+			if (g.hasPlayerCollision(cx, cy  - 2) && ry <= 0.01f)
 			{
 				gravy = 80;
 				dy = 0;
@@ -135,7 +135,7 @@ void Entity::update(double dt){
 		// Collision when go down
 		do
 		{
-			if (g.hasCollision(cx, cy + 1) && ry >= 0.99f)
+			if (g.hasPlayerCollision(cx, cy + 1) && ry >= 0.99f)
 			{
 				setJumping(false);
 				dy = 0;
@@ -151,13 +151,13 @@ void Entity::update(double dt){
 	}
 	else
 	{
-		if (!g.hasCollision(cx , cy + 1))
+		if (!g.hasPlayerCollision(cx , cy + 1))
 		{
 			setJumping(true);
 		}
 	}
 
-	if (waitToUncrouch && !g.hasCollision(cx, cy  - 1))
+	if (waitToUncrouch && !g.hasPlayerCollision(cx, cy  - 1))
 	{
 		unCrouch();
 		waitToUncrouch = false;
@@ -239,12 +239,6 @@ bool Entity::im()
 		dx = dy = 0;
 		setJumping(false);
 	}
-	if (Button("save")) {
-		(*Game::me).saveData(cx, cy);
-	}
-	if (Button("load")) {
-		(*Game::me).loadData();
-	}
 	return chg||chgCoo;
 }
 
@@ -277,7 +271,7 @@ void Entity::crouch()
 
 void Entity::unCrouch()
 {
-	if ((*Game::me).hasCollision(cx, cy  - 1))
+	if ((*Game::me).hasPlayerCollision(cx, cy  - 1))
 	{
 		waitToUncrouch = true;
 		return;
