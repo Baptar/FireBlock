@@ -92,18 +92,18 @@ void Game::initMainChar(){
 
 void Game::cacheWalls(){
 	wallSprites.clear();
-	bool collisionTop;
+	/*bool collisionTop;
 	bool collisionBottom;
 	bool collisionLeft;
 	bool collisionRight;
 	bool collisionTopLeft;
 	bool collisionTopRight;
 	bool collisionBottomLeft;
-	bool collisionBottomRight;
+	bool collisionBottomRight;*/
 	for (Vector2i & w : walls) {
 		sf::Sprite s;
 		
-		collisionTop = hasWall(w.x, w.y - 1);
+		/*collisionTop = hasWall(w.x, w.y - 1);
 		collisionBottom = hasWall(w.x, w.y + 1);
 		collisionLeft = hasWall(w.x - 1, w.y);
 		collisionRight = hasWall(w.x + 1, w.y);
@@ -282,7 +282,9 @@ void Game::cacheWalls(){
 		{
 			s.setTexture(textureWall_x4);
 			s.setPosition(float(w.x * C::GRID_SIZE), float(w.y * C::GRID_SIZE));
-		}
+		}*/
+		s.setTexture(textureWall_x4);
+		s.setPosition(float(w.x * C::GRID_SIZE), float(w.y * C::GRID_SIZE));
 		wallSprites.push_back(s);
 	}
 }
