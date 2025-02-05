@@ -1,58 +1,34 @@
 ﻿#include <imgui.h>
 
 #include "Ennemy.hpp"
+
 #include "C.hpp"
 #include "Game.hpp"
 
-Ennemy::Ennemy(int cx, int cy, sf::RectangleShape* _spr) : spr(_spr) 
+Ennemy::Ennemy(int _cx, int _cy): spriteEnnemy(SpriteEnnemy(*this))
 {
-	if (!textureIdle.loadFromFile("res/Idle.png")) printf("ERR : LOAD FAILED\n");
-	if (!textureRun.loadFromFile("res/Run.png")) printf("ERR : LOAD FAILED\n");
-	sprite.setTexture(textureIdle);
-	sprite.setTextureRect(sf::IntRect(0, 0, 128, 128));
-	sprite.setScale(sf::Vector2f(.5f, .5f));
-	sprite.setOrigin(128 / 2.0f, 128);
-
-	setCooGrid(cx, cy);
+	setCooGrid(_cx, _cy);
 }
 
-Ennemy::Ennemy(int cx, int cy)
+void Ennemy::update(double _dt)
 {
-	if (!textureIdle.loadFromFile("res/Idle.png")) printf("ERR : LOAD FAILED\n");
-	if (!textureRun.loadFromFile("res/Run.png")) printf("ERR : LOAD FAILED\n");
-	sprite.setTexture(textureIdle);
-	sprite.setTextureRect(sf::IntRect(0, 0, 128, 128));
-	sprite.setScale(sf::Vector2f(.5f, .5f));
-	sprite.setOrigin(128 / 2.0f, 128);
-
-	setCooPixel(cx, cy);
-}
-
-void Ennemy::update(double dt)
-{
+	spriteEnnemy.update(_dt);
+	
 	Game& g = *Game::me;
-	double rate = 1.0 / dt;
+	double rate = 1.0 / _dt;
 	double dfr = 60.0f / rate;
 
-	dy += gravy * dt;
+	dy += gravy * _dt;
 	dy = dy * pow(fry, dfr);
 	dx = (moveRight ?  15 : -15) * pow(frx, dfr);
 
-	rx += dx * dt;
-	ry += dy * dt;
+	rx += dx * _dt;
+	ry += dy * _dt;
 
 	// Check not moving
 	if (dx <= 2.0f && dx >= -2.0f && dy <= 2.0f && !dropping)
 	{
-		if (animationRow != 0) setAnimationFrame(0, 0);
-	}
-
-	animationTime += dt;
-	if (animationTime >= frameSpeed) {
-		animationTime = 0;
-		currentFrame = (currentFrame + 1) % numberOfFrame;
-		
-		setAnimationFrame(currentFrame, animationRow);
+		spriteEnnemy.playAnimationSprite(0, 0);
 	}
 	
 	// Collision Left
@@ -60,7 +36,6 @@ void Ennemy::update(double dt)
 	{
 		if (g.hasPlayerCollision(cx - 1, cy) && rx < 0.5)
 		{
-			//if (animationRow != 0 && !dropping) setAnimationFrame(0, 0);
 			moveRight = true;
 			dx = 0.0f;
 			rx = 0.5f;
@@ -69,7 +44,7 @@ void Ennemy::update(double dt)
 		{
 			if (!dropping)
 			{
-				if (animationRow != 1) setAnimationFrame(0, 1);
+				spriteEnnemy.playAnimationSprite(0, 1);
 			}
 			moveRight = false;
 			rx++;
@@ -82,7 +57,6 @@ void Ennemy::update(double dt)
 	{
 		if (g.hasPlayerCollision(cx + 1, cy) && rx > 0.5)
 		{
-			//if (animationRow != 0 && !dropping) setAnimationFrame(0, 0);
 			moveRight = false;
 			dx = 0.0f;
 			rx = 0.5f;
@@ -91,7 +65,7 @@ void Ennemy::update(double dt)
 		{
 			if (!dropping)
 			{
-				if (animationRow != 1) setAnimationFrame(0, 1);
+				spriteEnnemy.playAnimationSprite(0, 1);
 			}
 			moveRight = true;
 			rx--;
@@ -118,56 +92,65 @@ void Ennemy::update(double dt)
 			}
 		} while (ry > 1);
 	}
-
 	
 	if (!g.hasPlayerCollision(cx, cy + 1))
 	{
 		setDropping(true);
 	}
-
 	syncPos();
 }
 
-void Ennemy::setCooPixel(int px, int py)
+void Ennemy::setCooPixel(int _px, int _py)
 {
-	cx = px / C::GRID_SIZE;
-	cy = py / C::GRID_SIZE;
+	cx = _px / C::GRID_SIZE;
+	cy = _py / C::GRID_SIZE;
 
-	rx = (px - (cx * C::GRID_SIZE)) / (float)C::GRID_SIZE;
-	ry = (py - (cy * C::GRID_SIZE)) / (float)C::GRID_SIZE;
+	rx = (_px - (cx * C::GRID_SIZE)) / (float)C::GRID_SIZE;
+	ry = (_py - (cy * C::GRID_SIZE)) / (float)C::GRID_SIZE;
 
 	syncPos();
 }
 
-void Ennemy::setCooGrid(float coox, float cooy)
+void Ennemy::setCooGrid(float _coox, float _cooy)
 {
-	cx = (int)coox;
-	rx = coox - cx;
+	cx = (int)_coox;
+	rx = _coox - cx;
 
-	cy = (int)cooy;
-	ry = cooy - cy;
+	cy = (int)_cooy;
+	ry = _cooy - cy;
 	syncPos();
 }
 
-sf::Vector2i Ennemy::getPosPixel()
+sf::Vector2i Ennemy::getPosPixel() const
 {
 	return sf::Vector2i((cx + rx) * C::GRID_SIZE, (cy + ry) * C::GRID_SIZE);
 }
 
 void Ennemy::syncPos()
 {
-	sprite.setPosition((cx + rx) * C::GRID_SIZE, (cy + ry) * C::GRID_SIZE);
-	if (spr)
-	{
-		sf::Vector2f pos = { (cx + rx) * C::GRID_SIZE, (cy + ry) * C::GRID_SIZE };
-		spr->setPosition(pos);
-	}
+	spriteEnnemy.getSprite().setPosition((cx + rx) * C::GRID_SIZE, (cy + ry) * C::GRID_SIZE);
 }
 
-void Ennemy::draw(sf::RenderWindow& win)
+void Ennemy::draw(sf::RenderWindow& _win)
 {
-	if (spr) win.draw(*spr);
-	win.draw(sprite);
+	_win.draw(spriteEnnemy.getSprite());
+}
+
+void Ennemy::setDropping(bool _onOff)
+{
+	if (dropping && _onOff)
+		return;
+
+	if (_onOff) {
+		spriteEnnemy.playAnimationSprite(0, 2);
+		gravy = 80;
+		dropping = true;
+	}
+	else {
+		spriteEnnemy.playAnimationSprite(0, 0);
+		gravy = 0;
+		dropping = false;
+	}
 }
 
 bool Ennemy::im()
@@ -176,6 +159,7 @@ bool Ennemy::im()
 
 	bool chg = false;
 
+	Value("Dropping", dropping);
 	Value("cx", cx);
 	Value("cy", cy);
 
@@ -199,44 +183,4 @@ bool Ennemy::im()
 	chg |= DragFloat("gravy/fry", &gravy, 0.001f, -2, 2);
 
 	return chg || chgCoo;
-}
-
-void Ennemy::setAnimationFrame(int _frame, int _animationRow)
-{
-	animationTime = 0.0f;
-	this->animationRow = _animationRow;
-	float scaleAbs = abs(sprite.getScale().x);
-	sprite.setScale((moveRight ? scaleAbs : -scaleAbs), scaleAbs);
-	switch (_animationRow)
-	{
-	case 0:
-		sprite.setTexture(textureIdle);
-		numberOfFrame = 6;
-		break;
-	case 1:
-		sprite.setTexture(textureRun);
-		numberOfFrame = 6;
-	default:
-		sprite.setTexture(textureRun);
-		numberOfFrame = 6;
-		break;
-	}
-	sprite.setTextureRect(sf::IntRect(_frame * 128, 0, 128, 128));
-}
-
-void Ennemy::setDropping(bool onOff)
-{
-	if (dropping && onOff)
-		return;
-
-	if (onOff) {
-		if (animationRow != 2) setAnimationFrame(0, 2);
-		gravy = 80;
-		dropping = true;
-	}
-	else {
-		if (animationRow != 0) setAnimationFrame(0, 0);
-		gravy = 0;
-		dropping = false;
-	}
 }

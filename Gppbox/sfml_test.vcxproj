@@ -167,7 +167,7 @@
     <ClCompile Include="Bloom.cpp" />
     <ClCompile Include="SecondOrderDynamics.cpp" />
     <ClCompile Include="Ennemy.cpp" />
-    <ClCompile Include="Entity.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="HotReloadShader.cpp" />
     <ClCompile Include="Lib.cpp" />
@@ -177,6 +177,8 @@
     <ClCompile Include="libs\imgui\imgui_widgets.cpp" />
     <ClCompile Include="app.cpp" />
     <ClCompile Include="Particle.cpp" />
+    <ClCompile Include="SpriteEnnemy.cpp" />
+    <ClCompile Include="SpritePlayer.cpp" />
     <ClCompile Include="sys.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -186,7 +188,7 @@
     <ClInclude Include="SecondOrderDynamics.h" />
     <ClInclude Include="Dice.hpp" />
     <ClInclude Include="Ennemy.hpp" />
-    <ClInclude Include="Entity.hpp" />
+    <ClInclude Include="Player.hpp" />
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="HotReloadShader.hpp" />
     <ClInclude Include="Interp.hpp" />
@@ -196,6 +198,8 @@
     <ClInclude Include="libs\imgui\imgui.h" />
     <ClInclude Include="Particle.hpp" />
     <ClInclude Include="ParticleMan.hpp" />
+    <ClInclude Include="SpriteEnnemy.h" />
+    <ClInclude Include="SpritePlayer.h" />
     <ClInclude Include="sys.hpp" />
   </ItemGroup>
   <ItemGroup>

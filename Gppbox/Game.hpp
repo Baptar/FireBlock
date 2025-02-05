@@ -15,18 +15,12 @@
 
 using namespace sf;
 
-class Entity;
+class Player;
 class HotReloadShader;
 class Game {
 public:
-	sf::Texture						textureWall_x0;
-	sf::Texture						textureWall_x1;
-	sf::Texture						textureWall_x2;
-	sf::Texture						textureWall_x3;
 	sf::Texture						textureWall_x4;
-	sf::Texture						textureWall_x0Diag;
-	sf::Texture						textureWall_x02Diag;
-	sf::Texture						textureWall_x2Mid;
+
 	sf::RenderWindow*				win = nullptr;
 	float							zoom = 0.28f;
 	float							f = 0.7f;
@@ -37,7 +31,6 @@ public:
 	Vector2i						posMouse;
 	
 	sf::RectangleShape				bg;
-	sf::RectangleShape				bg2;
 	HotReloadShader *				bgShader = nullptr;
 
 	sf::Texture						tex;
@@ -47,8 +40,7 @@ public:
 	unsigned int					selectedElement = 0;
 	std::vector<sf::Vector2i>		walls;
 	std::vector<sf::Sprite>			wallSprites;
-	std::vector<sf::Sprite>			ennemmySprites;
-	std::vector<Entity*>			ents;
+	std::vector<Player*>			ents;
 	std::vector<Ennemy*>			ennemies;
 
 	ParticleMan beforeParts;
@@ -56,36 +48,32 @@ public:
 
 	static Game* me;
 
-
-	
-		Game(sf::RenderWindow * win);
-
+		 Game(sf::RenderWindow * _win);
 	void initMainChar();
 	void cacheWalls();
-	void cacheEnnemies();
 
-	void processInput(sf::Event ev);
+	void processInput(sf::Event _ev);
 	bool wasPressed = false;
-	void pollInput(double dt);
+	void pollInput(double _dt);
 	void onSpacePressed();
 
-	bool hasPlayerCollision(int cx, int cy);
-	bool hasWall(int cx, int cy);
-	bool hasEnnemy(int cx, int cy);
-	bool hasPlayer(int cx, int cy);
-	void addWall(int cx, int cy);
-	void addEnnemy(int cx, int cy);
+	bool hasPlayerCollision(int _cx, int _cy);
+	bool hasWall(int _cx, int _cy);
+	bool hasEnnemy(int _cx, int _cy);
+	bool hasPlayer(int _cx, int _cy);
+	void addWall(int _cx, int _cy);
+	void addEnnemy(int _cx, int _cy);
 
-	void update(double dt);
+	void update(double _dt);
 
-	void draw(sf::RenderWindow& win);
+	void draw(sf::RenderWindow& _win);
 
 	
-	void removeWallAtPosition(int cx, int cy);
+	void removeWallAtPosition(int _cx, int _cy);
 	void im();
 
-	bool loadData(const std::filesystem::path& filePath);
-	void saveData(const std::filesystem::path& filePath) const;
+	bool loadData(const std::filesystem::path& _filePath);
+	void saveData(const std::filesystem::path& _filePath) const;
 
-	Entity& getPlayer() const;
+	Player& getPlayer() const;
 };

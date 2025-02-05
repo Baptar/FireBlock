@@ -21,7 +21,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-#include "Entity.hpp"
+#include "Player.hpp"
 #include "SecondOrderDynamics.h"
 
 extern "C" {
@@ -74,7 +74,7 @@ int main()
 
 	// init game
     Game g(&window);
-	Entity& player = g.getPlayer();
+	Player& player = g.getPlayer();
 	
 	// init Camera
 	sf::Vector2f cameraPos ={ 0 , 0};
