@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <vector>
 
-#include "Ennemy.h"
+#include "Ennemy.hpp"
 #include "SFML/Graphics.hpp"
 #include "SFML/System.hpp"
 #include "SFML/Window.hpp"
@@ -47,6 +47,7 @@ public:
 	unsigned int					selectedElement = 0;
 	std::vector<sf::Vector2i>		walls;
 	std::vector<sf::Sprite>			wallSprites;
+	std::vector<sf::Sprite>			ennemmySprites;
 	std::vector<Entity*>			ents;
 	std::vector<Ennemy*>			ennemies;
 

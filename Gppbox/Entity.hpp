@@ -51,10 +51,6 @@ public:
 	bool		crouching = false;
 	bool		waitToUncrouch = false;
 	bool		moveRight = true;
-	sf::Vector2f velocityPlayer;
-	sf::Vector2f accelerationPlayer;
-	sf::Vector2f previousPositionPlayer;
-	sf::Vector2f previousVelocityPlayer;
 
 					Entity(sf::RectangleShape* spr);
 

@@ -75,23 +75,41 @@ Game::Game(sf::RenderWindow * win) {
 }
 
 void Game::initMainChar(){	
-	auto spr = new sf::RectangleShape({ C::GRID_SIZE, C::GRID_SIZE * 2});
+	{
+		auto spr = new sf::RectangleShape({ C::GRID_SIZE, C::GRID_SIZE * 2 });
+		spr->setFillColor(sf::Color::Transparent);
+		//spr->setOutlineColor(sf::Color::Red);
+		//spr->setOutlineThickness(2);
+		spr->setOrigin({ C::GRID_SIZE * 0.5f, C::GRID_SIZE * 2 });
+		auto e = new Entity(spr);
+
+		//auto e = new Entity();
+		e->setCooGrid(3, int(C::RES_Y / C::GRID_SIZE) - 10);
+		e->ry = 0.99f;
+		e->syncPos();
+		ents.push_back(e);
+		printf("ent added");
+		cacheEnnemies();
+	}
+
+	/////
+
+	auto spr = new sf::RectangleShape({ C::GRID_SIZE, C::GRID_SIZE * 2 });
 	spr->setFillColor(sf::Color::Transparent);
 	//spr->setOutlineColor(sf::Color::Red);
 	//spr->setOutlineThickness(2);
 	spr->setOrigin({ C::GRID_SIZE * 0.5f, C::GRID_SIZE * 2 });
-	auto e = new Entity(spr);
-	
+	auto e = new Ennemy(6, int(C::RES_Y / C::GRID_SIZE) - 10, spr);
+
 	//auto e = new Entity();
-	e->setCooGrid(3, int(C::RES_Y / C::GRID_SIZE) - 10);
+	//e->setCooGrid();
 	e->ry = 0.99f;
 	e->syncPos();
-	ents.push_back(e);
+	ennemies.push_back(e);
 	printf("ent added");
 }
 
 void Game::cacheWalls(){
-	wallSprites.clear();
 	/*bool collisionTop;
 	bool collisionBottom;
 	bool collisionLeft;
@@ -100,6 +118,7 @@ void Game::cacheWalls(){
 	bool collisionTopRight;
 	bool collisionBottomLeft;
 	bool collisionBottomRight;*/
+	wallSprites.clear();
 	for (Vector2i & w : walls) {
 		sf::Sprite s;
 		
@@ -283,6 +302,8 @@ void Game::cacheWalls(){
 			s.setTexture(textureWall_x4);
 			s.setPosition(float(w.x * C::GRID_SIZE), float(w.y * C::GRID_SIZE));
 		}*/
+		
+
 		s.setTexture(textureWall_x4);
 		s.setPosition(float(w.x * C::GRID_SIZE), float(w.y * C::GRID_SIZE));
 		wallSprites.push_back(s);
@@ -291,6 +312,13 @@ void Game::cacheWalls(){
 
 void Game::cacheEnnemies()
 {
+	ennemmySprites.clear();
+	for (auto e : ennemies) {
+		sf::Sprite s;
+		s.setTexture(textureWall_x3);
+		s.setPosition(float(e->cx * C::GRID_SIZE), float(e->cy * C::GRID_SIZE));
+		ennemmySprites.push_back(s);
+	}
 }
 
 void Game::processInput(sf::Event ev) {
@@ -509,6 +537,9 @@ void Game::update(double dt) {
 	for (auto e : ents) 
 		e->update(dt);
 
+	for (auto e : ennemies)
+		e->update(dt);
+
 	if (bgShader) bgShader->update(dt);
 
 	beforeParts.update(dt);
@@ -540,6 +571,9 @@ void Game::update(double dt) {
 		win.draw(r);
 	
 	for (auto e: ents)
+		e->draw(win);
+
+	for (auto e : ennemies)
 		e->draw(win);
 
 	afterParts.draw(win);

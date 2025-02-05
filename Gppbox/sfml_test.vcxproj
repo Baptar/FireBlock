@@ -185,7 +185,7 @@
     <ClInclude Include="C.hpp" />
     <ClInclude Include="SecondOrderDynamics.h" />
     <ClInclude Include="Dice.hpp" />
-    <ClInclude Include="Ennemy.h" />
+    <ClInclude Include="Ennemy.hpp" />
     <ClInclude Include="Entity.hpp" />
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="HotReloadShader.hpp" />
