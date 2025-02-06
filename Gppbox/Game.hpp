@@ -24,7 +24,6 @@ public:
 	sf::Texture						texBG;
 	HotReloadShader *				bgShader = nullptr;
 	CameraManager					camera;
-	Player							player;
 	
 	float							zoom = 0.28f;
 	float							f = 0.7f;

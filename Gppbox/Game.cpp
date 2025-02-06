@@ -63,12 +63,13 @@ Game::Game(sf::RenderWindow * _win): camera({C::RES_X / 2.f, C::RES_Y / 2.f}, {C
 
 void Game::initMainChar(int cx, int cy){	
 	{
-		player.setCooGrid(cx,  cy);
-		player.ry = 0.99f;
-		player.syncPos();
-		players.push_back(&player);
+		auto e = new Player();
+		e->setCooGrid(cx, cy);
+		e->ry = 0.99f;
+		e->syncPos();
+		players.push_back(e);
 
-		camera.setPlayer(&player);
+		camera.setPlayer(e);
 	}
 }
 
@@ -461,6 +462,10 @@ bool Game::loadData(const std::filesystem::path& _filePath)
 		delete e;
 	ennemies.clear();
 
+	for (auto p : players)
+		delete p;
+	players.clear();
+
 	bool hasPlayer = false;
 	std::string line;
 	while (std::getline(in, line))
@@ -485,7 +490,6 @@ bool Game::loadData(const std::filesystem::path& _filePath)
 			hasPlayer = true;
 		}
 	}
-	if (!hasPlayer) return false;
 	
 	cacheWalls();
 	return true;
