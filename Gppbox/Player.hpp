@@ -1,10 +1,9 @@
 #pragma once
 
-#include <queue>
 #include <SFML/Graphics.hpp>
-
-#include "Bullet.h"
 #include "SpritePlayer.h"
+
+class Bullet;
 
 namespace sf {
 	class RenderWindow;
@@ -30,8 +29,9 @@ public:
 	bool		jumping = false;
 	bool		crouching = false;
 	bool		moveRight = true;
+	float		delayFire = 0.0f;
 
-	std::vector<Bullet> bullets;
+	std::vector<Bullet*> bullets;
 
 					Player();
 	void			update( double dt );

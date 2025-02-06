@@ -12,7 +12,7 @@ class Ennemy
 {
 public:
     SpriteEnnemy spriteEnnemy;
-    int         life = 2;
+    int         life = 10;
     bool        isDead = false;
     
     int			cx = 0;

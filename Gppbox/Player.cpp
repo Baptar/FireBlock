@@ -1,6 +1,8 @@
 #include <imgui.h>
 
 #include "Player.hpp"
+
+#include "Bullet.h"
 #include "C.hpp"
 #include "Game.hpp"
 
@@ -21,6 +23,8 @@ void Player::update(double dt){
 	
 	rx += dx * dt;
 	ry += dy * dt;
+
+	if (delayFire > 0.0f) delayFire -= dt;
 		
 	// Check not moving
 	if (dx <= 2.0f && dx >= -2.0f && dy<= 2.0f && (spritePlayer.animationRow == 1 || spritePlayer.animationRow == 2 || spritePlayer.animationRow == 10) && !jumping)
@@ -117,8 +121,8 @@ void Player::update(double dt){
 	}
 	syncPos();
 	
-	for (Bullet b : bullets)
-		b.update(dt);
+	for (auto b : bullets)
+		b->update(dt);
 	
 }
 
@@ -148,8 +152,8 @@ void Player::syncPos() {
 void Player::draw(sf::RenderWindow& win){
 	win.draw(spritePlayer.getSprite());
 	
-	for (Bullet b : bullets)
-		b.draw();
+	for (Bullet* b : bullets)
+		b->draw();
 }
 
 void Player::setJumping(bool onOff){
@@ -184,14 +188,15 @@ void Player::stopFire()
 
 void Player::fire()
 {
-	if (firing || reloading || jumping) return;
+	if (reloading || jumping || delayFire > 0) return;
+	delayFire = 0.1f;
 	
 	// Start Fire System
 	firing = true;
 	if (dx > 2.0f || dx < -2.0f) spritePlayer.playAnimationSprite(spritePlayer.currentFrame + 1, 10);
 	else spritePlayer.playAnimationSprite(0, 6);
 
-	bullets.push(Bullet({cx, cy}, moveRight));
+	bullets.emplace_back(new Bullet({cx, cy}, moveRight));
 }
 
 void Player::reload()
@@ -208,7 +213,13 @@ bool Player::im()
 	using namespace ImGui;
 
 	bool chg = false;
-	
+	if (TreeNodeEx("Bullets", ImGuiTreeNodeFlags_DefaultOpen)) {
+		for (auto b : bullets)
+			b->im();
+		TreePop();
+	}
+	Value("animation Row", spritePlayer.animationRow);
+	Value("currentFrame", spritePlayer.currentFrame);
 	Value("jumping", jumping);
 	Value("firing", firing);
 	Value("reloading", reloading);

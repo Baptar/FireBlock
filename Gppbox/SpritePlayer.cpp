@@ -83,7 +83,7 @@ void SpritePlayer::setAnimationFrame(int _frame, int _animationRow)
         break;
     case 2:
         sprite.setTexture(textureRun);
-        numberOfFrame = 10;
+        numberOfFrame = 9;
         break;
     case 3:
         sprite.setTexture(textureJump0);
@@ -115,7 +115,7 @@ void SpritePlayer::setAnimationFrame(int _frame, int _animationRow)
         break;
     case 10:
         sprite.setTexture(textureRunShot);
-        numberOfFrame = 10;
+        numberOfFrame = 9;
         break;
     default:
         sprite.setTexture(textureIdle);

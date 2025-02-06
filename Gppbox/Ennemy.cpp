@@ -14,6 +14,8 @@ Ennemy::Ennemy(int _cx, int _cy): spriteEnnemy(SpriteEnnemy(*this))
 void Ennemy::update(double _dt)
 {
 	spriteEnnemy.update(_dt);
+
+	if (isDead) return;
 	
 	Game& g = *Game::me;
 	double rate = 1.0 / _dt;
@@ -159,6 +161,7 @@ void Ennemy::takeDamage(int _damage)
 	if (life <= 0)
 	{
 		isDead = true;
+		spriteEnnemy.playAnimationSprite(0, 2);
 	}
 }
 
