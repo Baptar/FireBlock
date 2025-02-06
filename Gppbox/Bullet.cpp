@@ -3,8 +3,8 @@
 #include "C.hpp"
 #include "imgui.h"
 
-Bullet::Bullet(sf::Vector2i _pos, bool _moveRight) : cx(_pos.x), cy(_pos.y), moveRight(_moveRight), game(*Game::me)
-{
+Bullet::Bullet(sf::Vector2i _pos, bool _moveRight) : cx(_pos.x + (_moveRight ? 1 : - 1)), cy(_pos.y), moveRight(_moveRight), game(*Game::me) //rx(_pos.x - (float)(int)_pos.x), ry(_pos.y - (float)(int)_pos.y)
+{/// 0.82 ry
     speedX = moveRight ? speedX : -speedX; 
     speedY = Dice::randFloat(0.0f, bloom);
     shape.setRadius(1.f);
@@ -152,5 +152,6 @@ void Bullet::im()
 
 void Bullet::syncPos()
 {
-    shape.setPosition((cx + rx) * C::GRID_SIZE, (cy + ry) * C::GRID_SIZE);
+    // "- 0.2f" is a magic trick to fire near to weapon without change collision system I'm a magician "make it simple"
+    shape.setPosition((cx + rx) * C::GRID_SIZE, (cy + ry - 0.2f) * C::GRID_SIZE);
 }
