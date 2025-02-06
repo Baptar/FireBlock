@@ -20,8 +20,6 @@ private:
     float		gravy = 0.f;
     float		frx = 0.88f;
     float		fry = 0.95f;
-
-    bool        shouldDestroy = false;
     
     bool        moveRight = true;
     float       timeLife = 4.0f;
@@ -36,7 +34,8 @@ private:
     void		syncPos();
     
 public:
-  
+    bool        shouldDestroy = false;
+    
                 Bullet(sf::Vector2i pos = sf::Vector2i(0,0), bool moveRight = true);
     void        update(double _dt);
     void        draw();

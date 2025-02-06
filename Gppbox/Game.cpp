@@ -27,7 +27,7 @@ Game::Game(sf::RenderWindow * _win): camera({C::RES_X / 2.f, C::RES_Y / 2.f}, {C
 	me = this;
 	bg = sf::RectangleShape(Vector2f((float)_win->getSize().x, (float)_win->getSize().y));
 
-	bool isOk = texBG.loadFromFile("res/city.png");
+	bool isOk = texBG.loadFromFile("res/night.png");
 	if (!isOk) { printf("ERR : LOAD FAILED\n"); }
 	bg.setTexture(&texBG);
 	bg.setSize(sf::Vector2f(C::RES_X, C::RES_Y));

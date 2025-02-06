@@ -12,7 +12,11 @@ SpriteEnnemy::SpriteEnnemy(Ennemy& ennemy) : ennemy(ennemy)
 void SpriteEnnemy::update(double dt)
 {
     if (animationTime >= frameSpeed) {
-        if (animationRow == 2 && currentFrame == numberOfFrameDead - 1) return;
+        if (animationRow == 2 && currentFrame == numberOfFrameDead - 1)
+        {
+            finishedAnimDeath = true;
+            return;
+        }
         animationTime = 0;
         currentFrame = (currentFrame + 1) % numberOfFrame;
 		
@@ -57,6 +61,8 @@ void SpriteEnnemy::setAnimationFrame(int _frame, int _animationRow)
     
     animationTime = 0.0f;
     this->animationRow = _animationRow;
+    this->currentFrame = _frame % numberOfFrame;
+    
     float scaleAbs = abs(getSprite().getScale().x);
     getSprite().setScale((ennemy.moveRight ? scaleAbs : -scaleAbs), scaleAbs);
     switch (_animationRow)

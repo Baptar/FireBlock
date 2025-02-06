@@ -13,93 +13,95 @@ Ennemy::Ennemy(int _cx, int _cy): spriteEnnemy(SpriteEnnemy(*this))
 
 void Ennemy::update(double _dt)
 {
+	if (spriteEnnemy.finishedAnimDeath) return;
+
 	spriteEnnemy.update(_dt);
+	if (!isDead)
+	{	
+		Game& g = *Game::me;
+		double rate = 1.0 / _dt;
+		double dfr = 60.0f / rate;
+		
+		dy += gravy * _dt;
+		dy = dy * pow(fry, dfr);
+		dx = (moveRight ?  speedX : -speedX) * pow(frx, dfr);
 
-	if (isDead) return;
+		rx += dx * _dt;
+		ry += dy * _dt;
 	
-	Game& g = *Game::me;
-	double rate = 1.0 / _dt;
-	double dfr = 60.0f / rate;
-
-	dy += gravy * _dt;
-	dy = dy * pow(fry, dfr);
-	dx = (moveRight ?  speedX : -speedX) * pow(frx, dfr);
-
-	rx += dx * _dt;
-	ry += dy * _dt;
-
-	// Check not moving
-	if (dx <= 2.0f && dx >= -2.0f && dy <= 2.0f && !dropping)
-	{
-		spriteEnnemy.playAnimationSprite(0, 0);
-	}
+		// Check not moving
+		if (dx <= 2.0f && dx >= -2.0f && dy <= 2.0f && !dropping)
+		{
+			spriteEnnemy.playAnimationSprite(0, 0);
+		}
 	
-	// Collision Left
-	do
-	{
-		if (g.hasPlayerCollision(cx - 1, cy) && rx < 0.5)
-		{
-			moveRight = true;
-			dx = 0.0f;
-			rx = 0.5f;
-		}
-		else if (rx < 0)
-		{
-			if (!dropping)
-			{
-				spriteEnnemy.playAnimationSprite(0, 1);
-			}
-			moveRight = false;
-			rx++;
-			cx--;
-		}
-	} while (rx < 0);
-
-	// Collision Right
-	do
-	{
-		if (g.hasPlayerCollision(cx + 1, cy) && rx > 0.5)
-		{
-			moveRight = false;
-			dx = 0.0f;
-			rx = 0.5f;
-		}
-		else if (rx > 1)
-		{
-			if (!dropping)
-			{
-				spriteEnnemy.playAnimationSprite(0, 1);
-			}
-			moveRight = true;
-			rx--;
-			cx++;
-		}
-	} while (rx > 1);
-
-	if (dropping)
-	{
-		// Collision when go down
+		// Collision Left
 		do
 		{
-			if (g.hasPlayerCollision(cx, cy + 1) && ry >= 0.99f)
+			if (g.hasPlayerCollision(cx - 1, cy) && rx < 0.5)
 			{
-				setDropping(false);
-				dy = 0;
-				dx *= 0.5f;
-				ry = 0.99f;
+				moveRight = true;
+				dx = 0.0f;
+				rx = 0.5f;
 			}
-			else if (ry > 1)
+			else if (rx < 0)
 			{
-				ry--;
-				cy++;
+				if (!dropping)
+				{
+					spriteEnnemy.playAnimationSprite(0, 1);
+				}
+				moveRight = false;
+				rx++;
+				cx--;
 			}
-		} while (ry > 1);
+		} while (rx < 0);
+
+		// Collision Right
+		do
+		{
+			if (g.hasPlayerCollision(cx + 1, cy) && rx > 0.5)
+			{
+				moveRight = false;
+				dx = 0.0f;
+				rx = 0.5f;
+			}
+			else if (rx > 1)
+			{
+				if (!dropping)
+				{
+					spriteEnnemy.playAnimationSprite(0, 1);
+				}
+				moveRight = true;
+				rx--;
+				cx++;
+			}
+		} while (rx > 1);
+
+		if (dropping)
+		{
+			// Collision when go down
+			do
+			{
+				if (g.hasPlayerCollision(cx, cy + 1) && ry >= 0.99f)
+				{
+					setDropping(false);
+					dy = 0;
+					dx *= 0.5f;
+					ry = 0.99f;
+				}
+				else if (ry > 1)
+				{
+					ry--;
+					cy++;
+				}
+			} while (ry > 1);
+		}
+		else if (!g.hasPlayerCollision(cx, cy + 1))
+		{
+			setDropping(true);
+		}
+		syncPos();
 	}
-	else if (!g.hasPlayerCollision(cx, cy + 1))
-	{
-		setDropping(true);
-	}
-	syncPos();
 }
 
 void Ennemy::setCooPixel(int _px, int _py)

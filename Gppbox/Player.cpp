@@ -13,6 +13,18 @@ Player::Player(): spritePlayer(SpritePlayer(*this))
 void Player::update(double dt){
 	spritePlayer.update(dt);
 	
+	for (auto it = bullets.begin(); it != bullets.end(); ) {
+		Bullet* bullet = *it;
+		bullet->update(dt);
+
+		if (bullet->shouldDestroy) {
+			delete bullet;
+			it = bullets.erase(it); // Efface l'élément et avance l'itérateur
+		} else {
+			++it;
+		}
+	}
+	
 	Game& g = *Game::me;
 	double rate = 1.0 / dt;
 	double dfr = 60.0f / rate;
@@ -197,7 +209,7 @@ void Player::fire()
 	else spritePlayer.playAnimationSprite(0, 6);
 
 	//bullets.emplace_back(new Bullet({(float) cx + rx + 0.8f, (float)cy + ry - 1.2f}, moveRight));
-	bullets.emplace_back(new Bullet({cx, cy}, moveRight));
+	bullets.push_back(new Bullet({cx, cy}, moveRight));
 }
 
 void Player::reload()

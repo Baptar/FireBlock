@@ -54,8 +54,10 @@ private:
     
 public:
     sf::Sprite&  getSprite();
+    bool        finishedAnimDeath = false;
     
                 SpriteEnnemy(Ennemy& ennemy);
     void        update(double dt);
     void        playAnimationSprite(int frame, int animationRow);
+    
 };

@@ -69,6 +69,7 @@ void SpritePlayer::setAnimationFrame(int _frame, int _animationRow)
 {
     animationTime = 0.0f;
     this->animationRow = _animationRow;
+    this->currentFrame = _frame % numberOfFrame;
     float scaleAbs = abs(sprite.getScale().x);
     sprite.setScale((player.moveRight ? scaleAbs : -scaleAbs) , scaleAbs);
     switch (_animationRow)

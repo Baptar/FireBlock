@@ -1,5 +1,6 @@
 #pragma once
 
+#include <list>
 #include <SFML/Graphics.hpp>
 #include "SpritePlayer.h"
 
@@ -31,7 +32,7 @@ public:
 	bool		moveRight = true;
 	float		delayFire = 0.0f;
 
-	std::vector<Bullet*> bullets;
+	std::list<Bullet*> bullets;
 
 					Player();
 	void			update( double dt );
