@@ -165,6 +165,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Bloom.cpp" />
+    <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="SecondOrderDynamics.cpp" />
     <ClCompile Include="Ennemy.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -185,6 +186,7 @@
     <ClInclude Include="app.h" />
     <ClInclude Include="Bloom.hpp" />
     <ClInclude Include="C.hpp" />
+    <ClInclude Include="CameraManager.h" />
     <ClInclude Include="SecondOrderDynamics.h" />
     <ClInclude Include="Dice.hpp" />
     <ClInclude Include="Ennemy.hpp" />

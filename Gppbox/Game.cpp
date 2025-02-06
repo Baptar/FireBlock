@@ -21,61 +21,54 @@ struct Data {
 	Vector2i position;
 };
 
-Game::Game(sf::RenderWindow * _win) {
+Game::Game(sf::RenderWindow * _win): camera({C::RES_X / 2.f, C::RES_Y / 2.f}, {C::RES_X / 2.5f, C::RES_Y / 2.5f})
+{
 	this->win = _win;
 	me = this;
 	bg = sf::RectangleShape(Vector2f((float)_win->getSize().x, (float)_win->getSize().y));
 
-	bool isOk = tex.loadFromFile("res/night.png");
-	if (!isOk) { printf("ERR : LOAD FAILED\n");	}
-	if (!textureWall_x4.loadFromFile("res/wall_x4.png")) printf("ERR : LOAD FAILED\n");
-	
-	bg.setTexture(&tex);
+	bool isOk = texBG.loadFromFile("res/night.png");
+	if (!isOk) { printf("ERR : LOAD FAILED\n"); }
+	bg.setTexture(&texBG);
 	bg.setSize(sf::Vector2f(C::RES_X, C::RES_Y));
-	
-	bgShader = new HotReloadShader("res/bg.vert", "res/bg.frag");
-	
-	for (int i = 0; i < C::RES_X / C::GRID_SIZE; ++i)
-	{
-		walls.push_back( Vector2i(i, lastLine) );
-		walls.push_back( Vector2i(i, lastLine+1) );
-	}
-	// Left Wall
-	walls.push_back(Vector2i(0, lastLine-1));
-	walls.push_back(Vector2i(0, lastLine-2));
-	walls.push_back(Vector2i(0, lastLine-3));
-	// Right Wall
-	walls.push_back(Vector2i(cols-1, lastLine - 1));
-	walls.push_back(Vector2i(cols-1, lastLine - 2));
-	walls.push_back(Vector2i(cols-1, lastLine - 3));
+	if (!textureWall_x4.loadFromFile("res/wall_x4.png")) printf("ERR : LOAD FAILED\n");
 
-	// Middle Wall
-	walls.push_back(Vector2i(cols >>2, lastLine - 3));
-	walls.push_back(Vector2i(cols >>2, lastLine - 4));
-	walls.push_back(Vector2i((cols >> 2) + 1, lastLine - 4));
-	
+	bgShader = new HotReloadShader("res/bg.vert", "res/bg.frag");
+
+	if (!loadData("save.sav"))
+	{
+		for (int i = 0; i < C::RES_X / C::GRID_SIZE; ++i)
+		{
+			walls.push_back( Vector2i(i, lastLine) );
+			walls.push_back( Vector2i(i, lastLine+1) );
+		}
+		// Left Wall
+		walls.push_back(Vector2i(0, lastLine-1));
+		walls.push_back(Vector2i(0, lastLine-2));
+		walls.push_back(Vector2i(0, lastLine-3));
+		// Right Wall
+		walls.push_back(Vector2i(cols-1, lastLine - 1));
+		walls.push_back(Vector2i(cols-1, lastLine - 2));
+		walls.push_back(Vector2i(cols-1, lastLine - 3));
+
+		// Middle Wall
+		walls.push_back(Vector2i(cols >>2, lastLine - 3));
+		walls.push_back(Vector2i(cols >>2, lastLine - 4));
+		walls.push_back(Vector2i((cols >> 2) + 1, lastLine - 4));
+
+		initMainChar(3, int(C::RES_Y / C::GRID_SIZE) - 10);
+	}
 	cacheWalls();
-	initMainChar();
 }
 
-void Game::initMainChar(){	
+void Game::initMainChar(int cx, int cy){	
 	{
-		auto e = new Player();
+		player.setCooGrid(cx,  cy);
+		player.ry = 0.99f;
+		player.syncPos();
+		players.push_back(&player);
 
-		//auto e = new PlayerPlayer();
-		e->setCooGrid(3, int(C::RES_Y / C::GRID_SIZE) - 10);
-		e->ry = 0.99f;
-		e->syncPos();
-		ents.push_back(e);
-		printf("ent added");
-	}
-
-	/////
-	
-
-	for (int i = 0; i < 10; ++i)
-	{
-		addEnnemy(6 + 2 * i, int(C::RES_Y / C::GRID_SIZE) - 10);
+		camera.setPlayer(&player);
 	}
 }
 
@@ -97,21 +90,6 @@ void Game::processInput(sf::Event _ev) {
 	}
 	
 	if (_ev.type == sf::Event::KeyReleased) {
-		int here = 0;
-		if (_ev.key.code == Keyboard::K) {
-			int there = 0;
-			walls.clear();
-			cacheWalls();
-		}
-
-		/*if (ev.key.code == sf::Keyboard::LControl)
-		{
-			auto mainChar = ents[0];
-			if (mainChar) {
-				mainChar->unCrouch();
-			}
-		}*/
-
 		if (_ev.key.code == Keyboard::R) {
 			getPlayer().reload();
 		}
@@ -125,7 +103,7 @@ void Game::processInput(sf::Event _ev) {
 	{
 		if (_ev.joystickButton.button == 0) //bottom
 		{
-			auto mainChar = ents[0];
+			auto mainChar = players[0];
 			if (mainChar && !mainChar->jumping && !mainChar->reloading) {
 				mainChar->setJumping(true);
 			}
@@ -150,7 +128,7 @@ void Game::processInput(sf::Event _ev) {
 		{
 			printf("Stop Fire\n");
 			// Stop Fire
-			auto mainChar = ents[0];
+			auto mainChar = players[0];
 			if (mainChar) {
 				mainChar->stopFire();
 			}
@@ -169,8 +147,8 @@ void Game::pollInput(double _dt) {
 
 	// Move Left
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q) || sf::Joystick::getAxisPosition(0, Joystick::X) < -90.0f) {
-		if (ents.size()) {
-			auto mainChar = ents[0];
+		if (players.size()) {
+			auto mainChar = players[0];
 			if (mainChar) {
 				mainChar->dx = -lateralSpeed;
 			}
@@ -179,8 +157,8 @@ void Game::pollInput(double _dt) {
 	
 	// Move Right
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Joystick::getAxisPosition(0, Joystick::X) > 90.0f) {
-		if (ents.size()) {
-			auto mainChar = ents[0];
+		if (players.size()) {
+			auto mainChar = players[0];
 			if (mainChar) {
 				mainChar->dx = lateralSpeed;
 			}
@@ -189,8 +167,8 @@ void Game::pollInput(double _dt) {
 	
 	// Jump
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Joystick::isButtonPressed(0, 0)) {
-		if (ents.size()) {
-			auto mainChar = ents[0];
+		if (players.size()) {
+			auto mainChar = players[0];
 			if (mainChar && !mainChar->jumping && !mainChar->reloading && !hasPlayerCollision(mainChar->cx, mainChar->cy - 1)) {
 				mainChar->dy -= 40;
 				mainChar->setJumping(true);
@@ -229,30 +207,32 @@ void Game::pollInput(double _dt) {
 
 			}	
 		}
-		else if (!getPlayer().jumping) getPlayer().fire();
+		else if (!isEditing && !getPlayer().jumping)
+		{
+			getPlayer().fire();
+			camera.addShake(1.2f, 0.2f, 0.2f);
+		}
 	}
 
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left)
 		&& !ImGui::IsWindowHovered()
 		&& !ImGui::IsAnyItemHovered()
 		&& !ImGui::IsAnyItemActive()
-		&& !ImGui::IsAnyItemFocused())
+		&& !ImGui::IsAnyItemFocused()
+		&& isEditing)
 	{
-		if (isEditing)
+		//sf::Vector2f mousePosWorld = win->mapPixelToCoords(mousePositionWindow, cameraView);
+		int posX = (posMouse.x  / C::GRID_SIZE);
+		int posY = (posMouse.y / C::GRID_SIZE);
+		if (!hasWall(posX, posY) && selectedElement == 0 && !hasPlayer(posX, posY))
 		{
-			//sf::Vector2f mousePosWorld = win->mapPixelToCoords(mousePositionWindow, cameraView);
-			int posX = (posMouse.x  / C::GRID_SIZE);
-			int posY = (posMouse.y / C::GRID_SIZE);
-			if (!hasWall(posX, posY) && selectedElement == 0 && !hasPlayer(posX, posY))
-			{
-				addWall(posX, posY);
-				cacheWalls();
-			}
-			else if (!hasEnnemy(posX, posY) && selectedElement == 1 && !hasPlayer(posX, posY))
-			{
-				addEnnemy(posX, posY);
-			}	
+			addWall(posX, posY);
+			cacheWalls();
 		}
+		else if (!hasEnnemy(posX, posY) && selectedElement == 1 && !hasPlayer(posX, posY))
+		{
+			addEnnemy(posX, posY);
+		}	
 	}
 }
 
@@ -272,35 +252,31 @@ void Game::update(double _dt) {
 	pollInput(_dt);
 
 	g_time += _dt;
+	if (bgShader) bgShader->update(_dt);
+	beforeParts.update(_dt);
+	
 	if (!isEditing)
 	{
-		bg.setOrigin(bg.getSize().x / 2, bg.getSize().y / 2);
-		bg.setPosition(cameraView.getCenter());
-		bg.setSize(Vector2f(C::RES_X * zoom, C::RES_Y * zoom));
+		//bg.setOrigin(bg.getSize().x / 2, bg.getSize().y / 2);
+		//bg.setPosition(cameraView.getCenter());
+		//bg.setSize(Vector2f(C::RES_X * zoom, C::RES_Y * zoom));
+
+		for (auto e : players) 
+			e->update(_dt);
+
+		for (auto e : ennemies)
+			e->update(_dt);
 	}
 	else
 	{
-		bg.setOrigin(win->getDefaultView().getCenter());
-		bg.setPosition(win->getDefaultView().getCenter());
-		bg.setSize(Vector2f(win->getSize().x, win->getSize().y));
+		//bg.setOrigin(win->getDefaultView().getCenter());
+		//bg.setPosition(win->getDefaultView().getCenter());
+		//bg.setSize(Vector2f(win->getSize().x, win->getSize().y));
 	}
-	
-	posMouse = sf::Mouse::getPosition(*win);
-	
-	if (isEditing)
-	{
-		
-	}	
-	for (auto e : ents) 
-		e->update(_dt);
-
-	for (auto e : ennemies)
-		e->update(_dt);
-
-	if (bgShader) bgShader->update(_dt);
-
-	beforeParts.update(_dt);
 	afterParts.update(_dt);
+
+	camera.update(_dt);
+	posMouse = sf::Mouse::getPosition(*win);
 }
 
  void Game::draw(sf::RenderWindow & _win) {
@@ -310,34 +286,40 @@ void Game::update(double _dt) {
 	sf::Shader * sh = &bgShader->sh;
 	states.blendMode = sf::BlendAdd;
 	states.shader = sh;
-	states.texture = &tex;
-	sh->setUniform("texture", tex);
+	states.texture = &texBG;
+	sh->setUniform("texture", texBG);
 	//sh->setUniform("time", g_time);
 	_win.draw(bg, states);
 
+	View defaultView = _win.getView();
+
+	if (!isEditing)
+		camera.setActive(_win);
+	
 	beforeParts.draw(_win);
-	/*for (sf::RectangleShape & r : wallSprites)
-		win.draw(r);*/
 	
 	for (sf::Sprite& s : wallSprites)
-	{
 		_win.draw(s);
-	}
+	
 	
 	for (sf::RectangleShape& r : rects) 
 		_win.draw(r);
 	
-	for (auto e: ents)
+	for (auto e: players)
 		e->draw(_win);
 
 	for (auto e : ennemies)
+	{
+		e->syncPos();
 		e->draw(_win);
+	}
+		
 
 	afterParts.draw(_win);
+	_win.setView(defaultView);
 }
 
 void Game::onSpacePressed() {
-	printf("SPACE Start \n");
 }
 
 bool Game::hasPlayerCollision(int _cx, int _cy)
@@ -389,6 +371,7 @@ void Game::addWall(int _cx, int _cy)
 void Game::addEnnemy(int _cx, int _cy)
 {
 	Ennemy* ennemy = new Ennemy(_cx, _cy);
+	ennemy->setDropping(true);
 	ennemies.push_back(ennemy);
 }
 
@@ -435,7 +418,7 @@ void Game::im(){
 		TreePop();
 	}
 	if (TreeNodeEx("Player", ImGuiTreeNodeFlags_DefaultOpen)) {
-		for (auto e : ents)
+		for (auto e : players)
 			e->im();
 		TreePop();
 	}
@@ -446,6 +429,24 @@ void Game::im(){
 		chg |= DragFloat("z", &z, 0.01f, -20,20);
 		chg |= DragFloat("r", &r, 0.01f, -20,20);
 		TreePop();
+	}
+}
+
+void Game::saveData(const std::filesystem::path& _filePath) const
+{
+	std::ofstream out(_filePath);
+
+	for (auto wall : walls)
+	{
+		out << wall.x << " " << wall.y << " " << 0<<"\n";
+	}
+	for (auto ennemy : ennemies)
+	{
+		out << ennemy->cx << " " << ennemy->cy << " " << 1<<"\n";
+	}
+	for (auto p : players)
+	{
+		out << p->cx << " " << p->cy << " " << 2<<"\n";
 	}
 }
 
@@ -460,7 +461,7 @@ bool Game::loadData(const std::filesystem::path& _filePath)
 		delete e;
 	ennemies.clear();
 
-	
+	bool hasPlayer = false;
 	std::string line;
 	while (std::getline(in, line))
 	{
@@ -477,29 +478,22 @@ bool Game::loadData(const std::filesystem::path& _filePath)
 		{
 			addEnnemy(x, y);
 		}
+		
+		if (type == 2)
+		{
+			initMainChar(x, y);
+			hasPlayer = true;
+		}
 	}
+	if (!hasPlayer) return false;
+	
 	cacheWalls();
 	return true;
 }
 
-void Game::saveData(const std::filesystem::path& _filePath) const
-{
-	std::ofstream out(_filePath);
-
-	for (auto wall : walls)
-	{
-		out << wall.x << " " << wall.y << " " << 0<<"\n";
-	}
-	for (auto entt : ennemies)
-	{
-		out << entt->cx << " " << entt->cy << " " << 1<<"\n";
-	}
-}
-
-
 Player& Game::getPlayer() const
 {
-	return *ents[0];
+	return *players[0];
 }
 
 

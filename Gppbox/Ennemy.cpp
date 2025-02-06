@@ -93,8 +93,7 @@ void Ennemy::update(double _dt)
 			}
 		} while (ry > 1);
 	}
-	
-	if (!g.hasPlayerCollision(cx, cy + 1))
+	else if (!g.hasPlayerCollision(cx, cy + 1))
 	{
 		setDropping(true);
 	}

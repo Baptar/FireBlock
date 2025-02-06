@@ -21,9 +21,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-#include "Player.hpp"
-#include "SecondOrderDynamics.h"
-
 extern "C" {
 	// Force the use of the NVidia-graphics card on notebooks with both an IGP and a GPU
 	_declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
@@ -74,21 +71,17 @@ int main()
 
 	// init game
     Game g(&window);
-	Player& player = g.getPlayer();
 	
-	// init Camera
-	sf::Vector2f cameraPos = { 0 , 0};
-	SecondOrderDynamics cameraDynamic(g.f, g.z, g.r, cameraPos);
+	Vector2i winPos;
+	
 	View v = window.getDefaultView();
 	Vector2f viewCenter = v.getCenter();
-	float zoom = g.zoom;
-	v.zoom(zoom);
-
+	
 	sf::Clock timer;
 	
 	sf::Text fpsCounter;
 	fpsCounter.setFont(font);
-	fpsCounter.setString("FPS:");
+	fpsCounter.setString("FPS:");	
 	
 	double frameStart = 0.0;
 	double frameEnd = 0.0;
@@ -119,11 +112,6 @@ int main()
 		sf::Event event;
 		while (window.pollEvent(event))//sort un evenement de la liste pour le traiter
 		{
-			if (event.key.code == sf::Keyboard::L)
-			{
-				cameraDynamic.startShake(1.0f, 0.2f, 0.2f);
-				printf("start Shake\n");
-			}
 			ImGui::SFML::ProcessEvent(event);
 			g.processInput(event);
 			
@@ -144,6 +132,8 @@ int main()
     	
     	//don't use imgui before this;
     	ImGui::SFML::Update(window, sf::seconds((float)dt));
+
+    	g.update(dt);
     	
 		if (ImGui::CollapsingHeader("View")) {
 			auto sz = v.getSize();
@@ -164,45 +154,28 @@ int main()
 			ImGui::LabelText("Avg Update Time", "%0.6f", captureMdt);
 			ImGui::LabelText("Avg FPS", "%0.6f", 1.0 / captureMdt);
 		}
+    	window.clear();
+    	window.setView(v);//keep view up to date in case we want to do something with like... you know what.
+    	
 		if (ImGui::CollapsingHeader("Bloom Control")) {
 			ImGui::SliderFloat("bloomWidth", &bloomWidth, 0, 55);//55 is max acceptable kernel size for constants, otherwise we should use a texture
 			ImGui::ColorEdit4("bloomMul", &bloomMul.x);
 			ImGui::ColorEdit4("bloomMul2", &bloomMul.x);
 		}    	
-    	
-    	g.update(dt);
-    	g.cameraView = v;
 		g.im();
+    	
     	g.draw(window);
+    	
 		window.draw(fpsCounter);
 
     	// Bloom Management
     	if (blurShader) blurShader->update(dt);
     	if (bloomShader) bloomShader->update(dt);
-    	if (bloomWidth)
-    	{
-    		window.setView(window.getDefaultView());
-    		Bloom::render(window,winTex,destX,destFinal,&blurShader->sh,&bloomShader->sh, bloomWidth, bloomMul);
-    	}
-    	if (!g.isEditing)
-    	{
-    		float posXDiff = 100;
-    		if (player.moveRight) posXDiff *= -1;
-    		cameraDynamic.setParams(g.f, g.z, g.r);
-    		cameraPos = cameraDynamic.Update(dt,{ (float)player.getPosPixel().x - posXDiff,(float) player.getPosPixel().y});
-    		v.setCenter(cameraPos);
-    		v.zoom(g.zoom / zoom);
-    		zoom = g.zoom;
-    		window.setView(v);//keep view up to date in case we want to do something with like... you know what.
-    	}
-	    else
-	    {
-		    window.setView(window.getDefaultView());
-	    }
+    	if (bloomWidth)	Bloom::render(window,winTex,destX,destFinal,&blurShader->sh,&bloomShader->sh, bloomWidth, bloomMul);
     	
-    	
-		ImGui::SFML::Render(window);
-        window.display();
+    	ImGui::SFML::Render(window);
+    	window.display();
+
 		frameEnd = Lib::getTimeStamp();
 		fpsCounter.setString("FPS: "+std::to_string(1.0 / dt));
 		ImGui::EndFrame();
@@ -212,8 +185,6 @@ int main()
 			curDts = 0;
 		}
 		dts[curDts] = dt;
-
-    	window.clear();
     }
 
 	ImGui::SFML::Shutdown();
