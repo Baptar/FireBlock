@@ -63,6 +63,7 @@ public:
 	void							addWall(int _cx, int _cy);
 	void							addEnnemy(int _cx, int _cy);
 	void							removeWallAtPosition(int _cx, int _cy);
+	//void							removeEnnemyAtPosition(int _cx, int _cy);
 
 	void							update(double _dt);
 

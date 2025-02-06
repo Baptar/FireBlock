@@ -116,6 +116,10 @@ void Player::update(double dt){
 		}
 	}
 	syncPos();
+	
+	for (Bullet b : bullets)
+		b.update(dt);
+	
 }
 
 void Player::setCooPixel(int px, int py){
@@ -143,6 +147,9 @@ void Player::syncPos() {
 
 void Player::draw(sf::RenderWindow& win){
 	win.draw(spritePlayer.getSprite());
+	
+	for (Bullet b : bullets)
+		b.draw();
 }
 
 void Player::setJumping(bool onOff){
@@ -183,7 +190,8 @@ void Player::fire()
 	firing = true;
 	if (dx > 2.0f || dx < -2.0f) spritePlayer.playAnimationSprite(spritePlayer.currentFrame + 1, 10);
 	else spritePlayer.playAnimationSprite(0, 6);
-	printf("fire\n");
+
+	bullets.push(Bullet({cx, cy}, moveRight));
 }
 
 void Player::reload()

@@ -153,6 +153,15 @@ void Ennemy::setDropping(bool _onOff)
 	}
 }
 
+void Ennemy::takeDamage(int _damage)
+{
+	life -= _damage;
+	if (life <= 0)
+	{
+		isDead = true;
+	}
+}
+
 bool Ennemy::im()
 {
 	using namespace ImGui;

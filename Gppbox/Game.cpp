@@ -354,6 +354,7 @@ bool Game::hasEnnemy(int _cx, int _cy)
 {
 	for (auto e : ennemies)
 	{
+		if (e->isDead) continue;
 		if (e->cx == _cx && (e->cy == _cy ||e->cy == _cy - 1)) return true;
 	}
 	return false;

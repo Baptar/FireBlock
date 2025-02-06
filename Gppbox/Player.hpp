@@ -1,7 +1,9 @@
 #pragma once
 
+#include <queue>
 #include <SFML/Graphics.hpp>
 
+#include "Bullet.h"
 #include "SpritePlayer.h"
 
 namespace sf {
@@ -28,6 +30,8 @@ public:
 	bool		jumping = false;
 	bool		crouching = false;
 	bool		moveRight = true;
+
+	std::vector<Bullet> bullets;
 
 					Player();
 	void			update( double dt );

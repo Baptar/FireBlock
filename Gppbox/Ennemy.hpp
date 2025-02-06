@@ -12,7 +12,8 @@ class Ennemy
 {
 public:
     SpriteEnnemy spriteEnnemy;
-    double life = 0.0;
+    int         life = 2;
+    bool        isDead = false;
     
     int			cx = 0;
     int			cy = 0;
@@ -41,5 +42,6 @@ public:
     void			draw(sf::RenderWindow& _win);
     bool			im();
     void            setDropping(bool _onOff);
+    void            takeDamage(int _damage);
 
 };
