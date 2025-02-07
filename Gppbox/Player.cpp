@@ -15,7 +15,8 @@ void Player::update(double dt){
 	
 	for (auto it = bullets.begin(); it != bullets.end(); ) {
 		Bullet* bullet = *it;
-		if (bullet->shouldDestroy) {
+		if (bullet == nullptr) it = bullets.erase(it);
+		else if (bullet->shouldDestroy) {
 			delete bullet;
 			it = bullets.erase(it);
 		} else {
