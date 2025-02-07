@@ -207,8 +207,7 @@ void Player::fire()
 	firing = true;
 	if (dx > 2.0f || dx < -2.0f) spritePlayer.playAnimationSprite(spritePlayer.currentFrame + 1, 10);
 	else spritePlayer.playAnimationSprite(0, 6);
-
-	//bullets.emplace_back(new Bullet({(float) cx + rx + 0.8f, (float)cy + ry - 1.2f}, moveRight));
+	
 	bullets.push_back(new Bullet({cx, cy}, moveRight));
 }
 
