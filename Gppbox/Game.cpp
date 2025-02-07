@@ -64,7 +64,7 @@ Game::Game(sf::RenderWindow * _win): camera({C::RES_X / 2.f, C::RES_Y / 2.f}, {C
 void Game::initMainChar(int cx, int cy){	
 	{
 		auto e = new Player();
-		e->setCooGrid(cx, cy);
+		e->setCooGrid(cx, cy <= lastLine ? cy : 3);
 		e->ry = 0.99f;
 		e->syncPos();
 		players.push_back(e);
@@ -154,7 +154,8 @@ void Game::pollInput(double _dt) {
 		if (players.size()) {
 			auto mainChar = players[0];
 			if (mainChar) {
-				mainChar->dx = -lateralSpeed;
+				if (mainChar->reloading) mainChar->dx = -lateralSpeed / 2.0f;
+				else mainChar->dx = -lateralSpeed;
 			}
 		}
 	}
@@ -164,7 +165,8 @@ void Game::pollInput(double _dt) {
 		if (players.size()) {
 			auto mainChar = players[0];
 			if (mainChar) {
-				mainChar->dx = lateralSpeed;
+				if (mainChar->reloading) mainChar->dx = lateralSpeed / 2.0f;
+				else mainChar->dx = lateralSpeed;
 			}
 		}
 	}
