@@ -209,10 +209,21 @@ void Game::pollInput(double _dt) {
 				removeWallAtPosition(posX, posY);
 				cacheWalls();
 			}
-			else if (hasEnnemy(posX, posY))
+			else 
 			{
-				//
-
+				auto e = getEnnemyAtPosition(posX, posY);
+				if (e != nullptr)
+				{
+					for (auto it = ennemies.begin(); it != ennemies.end(); ) {
+						Ennemy* enn = *it;
+						if (enn == e) {
+							delete enn;
+							it = ennemies.erase(it);
+						} else {
+							++it;
+						}
+					}
+				}
 			}	
 		}
 		else if (!isEditing && !getPlayer().jumping)
@@ -220,7 +231,6 @@ void Game::pollInput(double _dt) {
 			getPlayer().fire();
 		}
 	}
-
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left)
 		&& !ImGui::IsWindowHovered()
 		&& !ImGui::IsAnyItemHovered()
@@ -228,10 +238,9 @@ void Game::pollInput(double _dt) {
 		&& !ImGui::IsAnyItemFocused()
 		&& isEditing)
 	{
-		//sf::Vector2f mousePosWorld = win->mapPixelToCoords(mousePositionWindow, cameraView);
 		int posX = (posMouse.x  / C::GRID_SIZE);
 		int posY = (posMouse.y / C::GRID_SIZE);
-		if (!hasWall(posX, posY) && editingWalls && !hasPlayer(posX, posY))
+		if (!hasWall(posX, posY) && editingWalls && !hasPlayer(posX, posY) && !hasEnnemy(posX, posY))
 		{
 			addWall(posX, posY);
 			cacheWalls();
@@ -361,7 +370,7 @@ bool Game::hasEnnemy(int _cx, int _cy)
 	for (auto e : ennemies)
 	{
 		if (e->isDead) continue;
-		if (e->cx == _cx && (e->cy == _cy ||e->cy == _cy - 1)) return true;
+		if (e->cx == _cx && (e->cy == _cy ||e->cy - 1 == _cy)) return true;
 	}
 	return false;
 }
@@ -380,8 +389,8 @@ void Game::addEnnemy(int _cx, int _cy)
 {
 	Ennemy* ennemy = new Ennemy(_cx, _cy);
 	ennemy->ry = 0.99f;
+	ennemy->rx = 0.5f;
 	ennemy->syncPos();
-	//ennemy->setDropping(true);
 	ennemies.push_back(ennemy);
 }
 
@@ -396,6 +405,16 @@ void Game::removeWallAtPosition(int _cx, int _cy)
 	}
 	if (!hasWallHere) walls.push_back(Vector2i(_cx, _cy));
 	else {walls = newWalls;}
+}
+
+Ennemy* Game::getEnnemyAtPosition(int _cx, int _cy)
+{
+	for (auto e : ennemies)
+	{
+		if (e->isDead) continue;
+		if (e->cx == _cx && (e->cy == _cy ||e->cy - 1 == _cy)) return e;
+	}
+	return nullptr;
 }
 
 void Game::saveData(const std::filesystem::path& _filePath) const

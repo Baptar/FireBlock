@@ -42,7 +42,7 @@ public:
 	std::vector<sf::Vector2i>		walls;
 	std::vector<sf::Sprite>			wallSprites;
 	std::vector<Player*>			players;
-	std::vector<Ennemy*>			ennemies;
+	std::list<Ennemy*>				ennemies;
 
 	ParticleMan beforeParts;
 	ParticleMan afterParts;
@@ -65,7 +65,7 @@ public:
 	void							addWall(int _cx, int _cy);
 	void							addEnnemy(int _cx, int _cy);
 	void							removeWallAtPosition(int _cx, int _cy);
-	//void							removeEnnemyAtPosition(int _cx, int _cy);
+	Ennemy*							getEnnemyAtPosition(int _cx, int _cy);
 
 	void							update(double _dt);
 

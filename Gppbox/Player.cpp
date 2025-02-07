@@ -17,7 +17,7 @@ void Player::update(double dt){
 		Bullet* bullet = *it;
 		if (bullet->shouldDestroy) {
 			delete bullet;
-			it = bullets.erase(it); // Efface l'élément et avance l'itérateur
+			it = bullets.erase(it);
 		} else {
 			bullet->update(dt);
 			++it;
