@@ -18,7 +18,7 @@ public:
     int			cx = 0;
     int			cy = 0;
     float		rx = 0.5f;
-    float		ry = 0.0f;
+    float		ry = 0.99f;
 
     float       speedXMin = 2.0f;
     float       speedXMax = 10.0f;

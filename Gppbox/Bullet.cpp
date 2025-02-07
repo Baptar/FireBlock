@@ -108,6 +108,7 @@ bool Bullet::isCollindingEnnemy(int _cx, int _cy)
         if (e->cx == _cx && (e->cy == _cy ||e->cy == _cy - 1))
         {
             e->takeDamage(damage);
+            damage = 0;
             return true;
         }
     }

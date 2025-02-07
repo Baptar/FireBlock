@@ -9,6 +9,7 @@ Ennemy::Ennemy(int _cx, int _cy): spriteEnnemy(SpriteEnnemy(*this))
 {
 	setCooGrid(_cx, _cy);
 	speedX = Dice::randFloat(speedXMin, speedXMax);
+	isDead = false;
 }
 
 void Ennemy::update(double _dt)
@@ -99,6 +100,7 @@ void Ennemy::update(double _dt)
 		else if (!g.hasPlayerCollision(cx, cy + 1))
 		{
 			setDropping(true);
+			gravy = 80;
 		}
 		syncPos();
 	}
@@ -146,12 +148,10 @@ void Ennemy::setDropping(bool _onOff)
 		return;
 
 	if (_onOff) {
-		spriteEnnemy.playAnimationSprite(0, 2);
 		gravy = 80;
 		dropping = true;
 	}
 	else {
-		spriteEnnemy.playAnimationSprite(0, 0);
 		gravy = 0;
 		dropping = false;
 	}
@@ -159,6 +159,7 @@ void Ennemy::setDropping(bool _onOff)
 
 void Ennemy::takeDamage(int _damage)
 {
+	printf("Ennemy::takeDamage()\n");
 	life -= _damage;
 	if (life <= 0)
 	{
@@ -173,6 +174,7 @@ bool Ennemy::im()
 
 	bool chg = false;
 
+	Value("isDead", isDead);
 	Value("Dropping", dropping);
 	Value("cx", cx);
 	Value("cy", cy);

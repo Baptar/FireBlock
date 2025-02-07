@@ -225,7 +225,7 @@ bool Player::im()
 	using namespace ImGui;
 
 	bool chg = false;
-	if (TreeNodeEx("Bullets", ImGuiTreeNodeFlags_DefaultOpen)) {
+	if (TreeNodeEx("Bullets", 0)) {
 		for (auto b : bullets)
 			b->im();
 		TreePop();

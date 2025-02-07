@@ -31,6 +31,8 @@ public:
 	float							r = 0.0f;
 	
 	bool							isEditing = false;
+	bool							editingWalls = true;
+	bool							editingEnemies = false;
 	Vector2i						posMouse;
 	
 	bool							canJumpInput = true;

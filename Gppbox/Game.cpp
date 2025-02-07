@@ -6,6 +6,7 @@
 #include "Game.hpp"
 
 #include <fstream>
+#include <imgui_internal.h>
 #include <sstream>
 
 #include "Player.hpp"
@@ -230,12 +231,12 @@ void Game::pollInput(double _dt) {
 		//sf::Vector2f mousePosWorld = win->mapPixelToCoords(mousePositionWindow, cameraView);
 		int posX = (posMouse.x  / C::GRID_SIZE);
 		int posY = (posMouse.y / C::GRID_SIZE);
-		if (!hasWall(posX, posY) && selectedElement == 0 && !hasPlayer(posX, posY))
+		if (!hasWall(posX, posY) && editingWalls && !hasPlayer(posX, posY))
 		{
 			addWall(posX, posY);
 			cacheWalls();
 		}
-		else if (!hasEnnemy(posX, posY) && selectedElement == 1 && !hasPlayer(posX, posY))
+		else if (!hasEnnemy(posX, posY) && editingEnemies && !hasPlayer(posX, posY))
 		{
 			addEnnemy(posX, posY);
 		}	
@@ -378,7 +379,9 @@ void Game::addWall(int _cx, int _cy)
 void Game::addEnnemy(int _cx, int _cy)
 {
 	Ennemy* ennemy = new Ennemy(_cx, _cy);
-	ennemy->setDropping(true);
+	ennemy->ry = 0.99f;
+	ennemy->syncPos();
+	//ennemy->setDropping(true);
 	ennemies.push_back(ennemy);
 }
 
@@ -393,50 +396,6 @@ void Game::removeWallAtPosition(int _cx, int _cy)
 	}
 	if (!hasWallHere) walls.push_back(Vector2i(_cx, _cy));
 	else {walls = newWalls;}
-}
-
-void Game::im(){
-	using namespace ImGui;
-	int hre = 0;
-
-	if (Button("save")) {
-		saveData("save.sav");
-	}
-	ImGui::SameLine();
-	if (Button("load")) {
-		loadData("save.sav");
-	}
-	ImGui::SameLine();
-	if (Checkbox("edit mode", &isEditing)) {
-
-	}
-	
-	if (TreeNodeEx("Walls", 0)) {
-		for (auto& w : walls) {
-			Value("x",w.x);
-			Value("y",w.y);
-		}
-		TreePop();
-
-	}
-	if (TreeNodeEx("Ennemies", ImGuiTreeNodeFlags_DefaultOpen)) {
-		for (auto e : ennemies)
-			e->im();
-		TreePop();
-	}
-	if (TreeNodeEx("Player", ImGuiTreeNodeFlags_DefaultOpen)) {
-		for (auto e : players)
-			e->im();
-		TreePop();
-	}
-	if (TreeNodeEx("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
-		bool chg = false;
-		chg |= DragFloat("zoom", &zoom, 0.01f, -20,20);
-		chg |= DragFloat("f", &f, 0.01f, -20,20);
-		chg |= DragFloat("z", &z, 0.01f, -20,20);
-		chg |= DragFloat("r", &r, 0.01f, -20,20);
-		TreePop();
-	}
 }
 
 void Game::saveData(const std::filesystem::path& _filePath) const
@@ -506,8 +465,84 @@ Player& Game::getPlayer() const
 	return *players[0];
 }
 
+void Game::im(){
+	using namespace ImGui;
+	int hre = 0;
+
+	// save button
+	if (Button("save")) {
+		saveData("save.sav");
+	}
+	// load button
+	ImGui::SameLine();
+	if (Button("load")) {
+		loadData("save.sav");
+	}
+	// edit checkbox
+	Checkbox("edit mode", &isEditing);
+
+	bool disableEnemies = !editingWalls;
+	bool disableWalls = !editingEnemies;
+
+	// Bouton "Ennemies"
+	if (disableEnemies) {
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.5f);
+	}
+
+	ImGui::SameLine();
+	if (ImGui::Button("Ennemies")) {
+		editingEnemies = true;
+		editingWalls = false;
+	}
+
+	if (disableEnemies) {  // Assure qu'on pop uniquement si on a push
+		ImGui::PopItemFlag();
+		ImGui::PopStyleVar();
+	}
+
+	// Bouton "Wall"
+	if (disableWalls) {
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.5f);
+	}
+
+	ImGui::SameLine();
+	if (ImGui::Button("Wall")) {
+		editingWalls = true;
+		editingEnemies = false;
+	}
+
+	if (disableWalls) {
+		ImGui::PopItemFlag();
+		ImGui::PopStyleVar();
+	}
+	
+	if (TreeNodeEx("Walls", 0)) {
+		for (auto& w : walls) {
+			Value("x",w.x);
+			Value("y",w.y);
+		}
+		TreePop();
+
+	}
+	if (TreeNodeEx("Ennemies", 0)) {
+		for (auto e : ennemies)
+			e->im();
+		TreePop();
+	}
+	if (TreeNodeEx("Player",0)) {
+		for (auto e : players)
+			e->im();
+		TreePop();
+	}
+	if (TreeNodeEx("Camera", 0)) {
+		camera.im();
+		TreePop();
+	}
+}
 
 
-
+/*ImGuiTreeNodeFlags_DefaultOpen*/
 
 
