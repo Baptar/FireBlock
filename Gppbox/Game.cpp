@@ -97,6 +97,7 @@ void Game::processInput(sf::Event _ev) {
 		
 		if (_ev.key.code == sf::Keyboard::Space)
 		{
+			canJumpInput = true;
 			//getPlayer().gravy = 120.0f;
 		}
 	}
@@ -105,8 +106,10 @@ void Game::processInput(sf::Event _ev) {
 		if (_ev.joystickButton.button == 0) //bottom
 		{
 			auto mainChar = players[0];
-			if (mainChar && !mainChar->jumping && !mainChar->reloading) {
+			if (mainChar && !mainChar->jumping && !mainChar->reloading && canJumpInput) {
+				canJumpInput = false;
 				mainChar->setJumping(true);
+				
 			}
 		}
 		if (_ev.joystickButton.button == 1) // right
@@ -170,7 +173,8 @@ void Game::pollInput(double _dt) {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Joystick::isButtonPressed(0, 0)) {
 		if (players.size()) {
 			auto mainChar = players[0];
-			if (mainChar && !mainChar->jumping && !mainChar->reloading && !hasPlayerCollision(mainChar->cx, mainChar->cy - 1)) {
+			if (mainChar && !mainChar->jumping && !mainChar->reloading && !hasPlayerCollision(mainChar->cx, mainChar->cy - 1) && canJumpInput) {
+				canJumpInput = false;
 				mainChar->dy -= 40;
 				mainChar->setJumping(true);
 			}
@@ -211,7 +215,6 @@ void Game::pollInput(double _dt) {
 		else if (!isEditing && !getPlayer().jumping)
 		{
 			getPlayer().fire();
-			camera.addShake(1.2f, 0.2f, 0.2f);
 		}
 	}
 

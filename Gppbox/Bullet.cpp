@@ -3,7 +3,7 @@
 #include "C.hpp"
 #include "imgui.h"
 
-Bullet::Bullet(sf::Vector2i _pos, bool _moveRight) : cx(_pos.x + (_moveRight ? 1 : - 1)), cy(_pos.y), moveRight(_moveRight), game(*Game::me) //rx(_pos.x - (float)(int)_pos.x), ry(_pos.y - (float)(int)_pos.y)
+Bullet::Bullet(sf::Vector2i _pos, bool _moveRight) : cx(_pos.x + (_moveRight ? 1 : - 1)), cy(_pos.y), moveRight(_moveRight), game(*Game::me)
 {
     speedX = moveRight ? speedX : -speedX; 
     speedY = Dice::randFloat(0.0f, bloom);

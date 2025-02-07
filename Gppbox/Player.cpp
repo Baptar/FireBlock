@@ -15,12 +15,11 @@ void Player::update(double dt){
 	
 	for (auto it = bullets.begin(); it != bullets.end(); ) {
 		Bullet* bullet = *it;
-		bullet->update(dt);
-
 		if (bullet->shouldDestroy) {
 			delete bullet;
 			it = bullets.erase(it); // Efface l'élément et avance l'itérateur
 		} else {
+			bullet->update(dt);
 			++it;
 		}
 	}
@@ -171,11 +170,11 @@ void Player::draw(sf::RenderWindow& win){
 void Player::setJumping(bool onOff){
 	if (jumping && onOff || reloading) 
 		return;
-
+	
 	if (onOff) {
 		stopFire();
 		spritePlayer.playAnimationSprite(0, 3);
-		gravy = 80;
+		gravy = 110;
 		jumping = true;
 	}
 	else {
@@ -202,6 +201,7 @@ void Player::fire()
 {
 	if (reloading || jumping || delayFire > 0) return;
 	delayFire = 0.1f;
+	Game::me->camera.addShake(1.2f, 0.2f, 0.2f);
 	
 	// Start Fire System
 	firing = true;

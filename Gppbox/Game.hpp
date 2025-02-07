@@ -33,7 +33,7 @@ public:
 	bool							isEditing = false;
 	Vector2i						posMouse;
 	
-
+	bool							canJumpInput = true;
 	bool							closing = false;
 
 	unsigned int					selectedElement = 0;

@@ -15,14 +15,14 @@ private:
     float		dy = 0.f;
     float		speedX = 20.f;
     float		speedY = 0.f;
-    float       bloom = 0.5f;
+    float       bloom = 1.5f;
     
     float		gravy = 0.f;
     float		frx = 0.88f;
     float		fry = 0.95f;
     
     bool        moveRight = true;
-    float       timeLife = 4.0f;
+    float       timeLife = 1.2f;
     int         damage = 1;
 
     Game&       game;
