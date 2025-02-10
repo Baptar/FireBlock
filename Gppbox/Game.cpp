@@ -245,7 +245,7 @@ void Game::pollInput(double _dt) {
 			addWall(posX, posY);
 			cacheWalls();
 		}
-		else if (!hasEnnemy(posX, posY) && editingEnemies && !hasPlayer(posX, posY))
+		else if (!hasWall(posX, posY) && !hasEnnemy(posX, posY) && editingEnemies && !hasPlayer(posX, posY))
 		{
 			addEnnemy(posX, posY);
 		}	

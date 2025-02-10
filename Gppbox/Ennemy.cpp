@@ -166,6 +166,7 @@ void Ennemy::takeDamage(int _damage)
 		isDead = true;
 		spriteEnnemy.playAnimationSprite(0, 2);
 	}
+	else spriteEnnemy.playAnimationSprite(0,3);
 }
 
 bool Ennemy::im()
