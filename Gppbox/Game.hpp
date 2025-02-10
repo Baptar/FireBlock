@@ -56,6 +56,8 @@ public:
 
 	void							processInput(sf::Event _ev);
 	bool							wasPressed = false;
+	bool							pressingRight = false;
+	bool							pressingLeft = false;
 	void							pollInput(double _dt);
 	void							onSpacePressed();
 

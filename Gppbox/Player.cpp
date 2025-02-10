@@ -56,12 +56,11 @@ void Player::update(double dt){
 		}
 		else if (rx < 0)
 		{
-			if (!jumping && !reloading)
+			if (!jumping && !reloading && g.pressingLeft)
 			{
 				if (firing) spritePlayer.playAnimationSprite(spritePlayer.currentFrame + 1, 10);
 				else if (!firing) spritePlayer.playAnimationSprite(spritePlayer.currentFrame + 1, 2);
 			}
-			moveRight = false;
 			rx++;
 			cx--;
 		}
@@ -78,12 +77,11 @@ void Player::update(double dt){
 		}
 		else if (rx > 1)
 		{
-			if (!jumping && !reloading)
+			if (!jumping && !reloading && g.pressingRight)
 			{
 				if (firing) spritePlayer.playAnimationSprite(spritePlayer.currentFrame + 1, 10);
 				else if (!firing) spritePlayer.playAnimationSprite(spritePlayer.currentFrame + 1, 2);
 			}
-			moveRight = true;
 			rx--;
 			cx++;
 		}
@@ -205,6 +203,7 @@ void Player::fire()
 	Game::me->camera.addShake(cameraShakeAmplitude, cameraShakeFrequency, cameraShakeDuration);
 	
 	// Start Fire System
+	dx += moveRight ? -reculPower : reculPower;
 	firing = true;
 	if (dx > 2.0f || dx < -2.0f) spritePlayer.playAnimationSprite(spritePlayer.currentFrame + 1, 10);
 	else spritePlayer.playAnimationSprite(0, 6);

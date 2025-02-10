@@ -22,6 +22,7 @@ public:
 	float		dy = 0.f;
 	float		gravy = 0.f;
 
+	float		reculPower = 1.0f;
 	float		frx = 0.88f;
 	float		fry = 0.95f;
 

@@ -116,6 +116,12 @@ void Game::processInput(sf::Event _ev) {
 		if (_ev.key.code == Keyboard::R) {
 			getPlayer().reload();
 		}
+		if (_ev.key.code == Keyboard::Q) {
+			pressingLeft = false;
+		}
+		if (_ev.key.code == Keyboard::D) {
+			pressingRight = false;
+		}
 		
 		if (_ev.key.code == sf::Keyboard::Space)
 		{
@@ -175,6 +181,8 @@ void Game::pollInput(double _dt) {
 		if (players.size()) {
 			auto mainChar = players[0];
 			if (mainChar) {
+				mainChar->moveRight = false;
+				pressingLeft = true;
 				if (mainChar->reloading) mainChar->dx = -lateralSpeed / 2.0f;
 				else mainChar->dx = -lateralSpeed;
 			}
@@ -186,6 +194,8 @@ void Game::pollInput(double _dt) {
 		if (players.size()) {
 			auto mainChar = players[0];
 			if (mainChar) {
+				mainChar->moveRight = true;
+				pressingRight = true;
 				if (mainChar->reloading) mainChar->dx = lateralSpeed / 2.0f;
 				else mainChar->dx = lateralSpeed;
 			}
