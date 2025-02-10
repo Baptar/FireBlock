@@ -104,6 +104,7 @@ bool Bullet::isCollindingEnnemy(int _cx, int _cy)
 {
     for (auto e : game.ennemies)
     {
+        if (shouldDestroy) return false;
         if (e->isDead) continue;
         if (e->cx == _cx && (e->cy == _cy ||e->cy == _cy - 1))
         {
@@ -119,6 +120,7 @@ bool Bullet::isCollindingWall(int _cx, int _cy)
 {
     for (Vector2i & w : game.walls)
     {
+        if (shouldDestroy) return false;
         if (w.x == _cx && w.y == _cy)
         {
             return true;

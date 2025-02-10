@@ -131,7 +131,6 @@ void Game::processInput(sf::Event _ev) {
 	{
 		if (_ev.mouseButton.button == sf::Mouse::Right)
 		{
-			printf("Stop Fire\n");
 			// Stop Fire
 			auto mainChar = players[0];
 			if (mainChar) {
