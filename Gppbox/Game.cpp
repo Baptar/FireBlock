@@ -84,6 +84,27 @@ void Game::cacheWalls(){
 	}
 }
 
+void Game::drawLinesEdit()
+{
+	Color color = Color::White;
+	color.a = 100;
+	
+	for (int i = 0; i < lastLine; i++)
+	{
+		sf::RectangleShape line(sf::Vector2f(C::RES_X, 0.6f));
+		line.setPosition(0, i * C::GRID_SIZE);
+		line.setFillColor(color);
+		win->draw(line);
+	}
+	for (int j = 0; j < cols; j++)
+	{
+		sf::RectangleShape line(sf::Vector2f(0.6f, C::RES_Y));
+		line.setPosition(j * C::GRID_SIZE, 0);
+		line.setFillColor(color);
+		win->draw(line);
+	}
+}
+
 void Game::processInput(sf::Event _ev) {
 	if (_ev.type == sf::Event::Closed) {
 		win->close();
@@ -244,7 +265,7 @@ void Game::pollInput(double _dt) {
 			addWall(posX, posY);
 			cacheWalls();
 		}
-		else if (!hasWall(posX, posY) && !hasEnnemy(posX, posY) && editingEnemies && !hasPlayer(posX, posY))
+		else if (!hasWall(posX, posY) && !hasWall(posX, posY - 1) && !hasEnnemy(posX, posY) && editingEnemies && !hasPlayer(posX, posY))
 		{
 			addEnnemy(posX, posY);
 		}	
@@ -319,6 +340,8 @@ void Game::update(double _dt) {
 	
 	for (sf::RectangleShape& r : rects) 
 		_win.draw(r);
+
+	if (isEditing) drawLinesEdit();
 
 	for (auto e : ennemies)
 	{

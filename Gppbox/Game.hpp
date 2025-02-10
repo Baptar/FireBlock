@@ -52,6 +52,7 @@ public:
 									Game(sf::RenderWindow * _win);
 	void							initMainChar(int cx, int cy);
 	void							cacheWalls();
+	void							drawLinesEdit();
 
 	void							processInput(sf::Event _ev);
 	bool							wasPressed = false;
