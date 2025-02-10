@@ -539,6 +539,7 @@ void Game::im(){
 	if (TreeNodeEx("Walls", 0)) {
 		for (auto& w : walls) {
 			Value("x",w.x);
+			ImGui::SameLine();
 			Value("y",w.y);
 		}
 		TreePop();

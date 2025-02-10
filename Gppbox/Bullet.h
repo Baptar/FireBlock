@@ -36,7 +36,7 @@ private:
 public:
     bool        shouldDestroy = false;
     
-                Bullet(sf::Vector2i pos = sf::Vector2i(0,0), bool moveRight = true);
+                Bullet(sf::Vector2i _pos = sf::Vector2i(0,0), bool _moveRight = true);
     void        update(double _dt);
     void        draw();
     void		im();

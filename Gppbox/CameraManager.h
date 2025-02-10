@@ -16,17 +16,17 @@ private:
 public:
     float zoom = 0.6f;
     float actualzoom = 1.0f;
-    float frequency = 0.7f;
+    float frequency = 0.5f;
     float damping = 0.78f;
     float overshoot = 1.06f;
     
-    CameraManager(sf::Vector2f center, sf::Vector2f size);
-    void update(double dt);
+    CameraManager(sf::Vector2f _center, sf::Vector2f _size);
+    void update(double _dt);
 
-    void setPlayer(Player* player);
-    void setActive(sf::RenderWindow& win) const;
+    void setPlayer(Player* _player);
+    void setActive(sf::RenderWindow& _win) const;
 
-    void addShake(float amplitude, float frequency, float duration);
+    void addShake(float _amplitude, float _frequency, float _duration);
 
     void im();
 };

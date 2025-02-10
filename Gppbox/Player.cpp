@@ -202,7 +202,7 @@ void Player::fire()
 {
 	if (reloading || jumping || delayFire > 0) return;
 	delayFire = 0.1f;
-	Game::me->camera.addShake(1.2f, 0.2f, 0.2f);
+	Game::me->camera.addShake(cameraShakeAmplitude, cameraShakeFrequency, cameraShakeDuration);
 	
 	// Start Fire System
 	firing = true;
@@ -237,9 +237,11 @@ bool Player::im()
 	Value("firing", firing);
 	Value("reloading", reloading);
 	Value("cx", cx);
+	ImGui::SameLine();
 	Value("cy", cy);
 
 	Value("rx",rx);
+	ImGui::SameLine();
 	Value("ry",ry);
 
 	sf::Vector2i pix = getPosPixel();
@@ -257,6 +259,10 @@ bool Player::im()
 	chg |= DragFloat2("dx/dy", &dx, 0.01f, -20,20);
 	chg |= DragFloat2("frx/fry", &frx, 0.001f, 0, 1);
 	chg |= DragFloat("gravy/fry", &gravy, 0.001f, -2, 2);
+
+	chg |= DragFloat("shake amplitude", &cameraShakeAmplitude, 0.001f, -2, 2);
+	chg |= DragFloat("shake frequency", &cameraShakeFrequency, 0.001f, -2, 2);
+	chg |= DragFloat("shake duration", &cameraShakeDuration, 0.001f, 0, 2);
 
 	if (Button("reset")) {
 		cx = 3;

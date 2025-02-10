@@ -3,19 +3,19 @@
 #include "C.hpp"
 #include "imgui.h"
 
-CameraManager::CameraManager(sf::Vector2f center, sf::Vector2f size): view(center, size), secondOrderDynamics(0, 0, 0, sf::Vector2f{0, 0}), target(center)
+CameraManager::CameraManager(sf::Vector2f _center, sf::Vector2f _size): view(_center, _size), secondOrderDynamics(0, 0, 0, sf::Vector2f{0, 0}), target(_center)
 {
    secondOrderDynamics.setParams(frequency, damping, overshoot);
 }
 
-void CameraManager::update(double dt)
+void CameraManager::update(double _dt)
 {
    if (player == nullptr) { printf("Camera has no player\n"); return; }
 
    float posXDiff = 100;
    if (player->moveRight) posXDiff *= -1;
    target = {(float)player->getPosPixel().x - posXDiff,(float) player->getPosPixel().y};
-   sf::Vector2f cameraPosition = secondOrderDynamics.Update(dt, target);
+   sf::Vector2f cameraPosition = secondOrderDynamics.update(_dt, target);
    view.setCenter(cameraPosition);
    view.zoom(zoom / actualzoom);
    actualzoom = zoom;
@@ -27,9 +27,9 @@ void CameraManager::setPlayer(Player* _player)
    target = sf::Vector2f((float)player->cx * C::GRID_SIZE, (float)player->cy + C::GRID_SIZE);
 }
 
-void CameraManager::setActive(sf::RenderWindow& win) const
+void CameraManager::setActive(sf::RenderWindow& _win) const
 {
-   win.setView(view);
+   _win.setView(view);
 }
 
 void CameraManager::addShake(float _amplitude, float _frequency, float _duration)

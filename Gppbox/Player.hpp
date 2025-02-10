@@ -32,6 +32,10 @@ public:
 	bool		moveRight = true;
 	float		delayFire = 0.0f;
 
+	float cameraShakeAmplitude = 1.2f;
+	float cameraShakeFrequency = 0.2f;
+	float cameraShakeDuration = 0.2f;
+
 	std::list<Bullet*> bullets;
 
 					Player();

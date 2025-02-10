@@ -16,32 +16,26 @@ private:
     float shakeTimer = 0.f;
 
 public:
-    // Constructeur : initialise le système avec fréquence, amortissement et réponse initiale
     SecondOrderDynamics(float f, float z, float r, sf::Vector2f x0) {
-        // Calcul des constantes
         k1 = z / (Dice::getPi() * f);
         k2 = 1.0f / ((2.0f * Dice::getPi() * f) * (2.0f * Dice::getPi() * f));
         k3 = (r * z) / (2.0f * Dice::getPi() * f);
-
-        // Initialisation des variables
+        
         xp = x0;
         y = x0;
         yd = sf::Vector2f(0.f, 0.f);
 
         std::srand(static_cast<unsigned>(std::time(nullptr)));
     }
-
-    // Mise à jour du filtre avec un pas de temps T et une nouvelle position cible x
-    sf::Vector2f Update(float T, sf::Vector2f x, sf::Vector2f xd = sf::Vector2f(NAN, NAN)) {
-        // Si aucune vitesse cible n'est donnée, on la calcule
+    
+    sf::Vector2f update(float T, sf::Vector2f x, sf::Vector2f xd = sf::Vector2f(NAN, NAN)) {
         if (std::isnan(xd.x) || std::isnan(xd.y)) {
             xd = (x - xp) / T;
             xp = x;
         }
-
-        // Intégration : mise à jour de la position et de la vitesse
-        y = y + T * yd;  // Intégration de la position avec la vitesse
-        yd = yd + T * ((x + k3 * xd - y - k1 * yd) / k2);  // Intégration de la vitesse avec l'accélération
+        
+        y = y + T * yd;
+        yd = yd + T * ((x + k3 * xd - y - k1 * yd) / k2);
 
         if (shakeDuration > 0.f) {
             shakeTimer += T;
