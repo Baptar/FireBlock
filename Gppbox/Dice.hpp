@@ -4,6 +4,7 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <random>
 
 class Dice {
 public:
@@ -25,11 +26,32 @@ public:
 		return 1.0f * rand() / RAND_MAX;
 	}
 
+	static int randInt(int min, int max)
+	{
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_int_distribution<> distrib(min, max);
+		return distrib(gen);
+	}
+
+	static float randFloat(float min, float max)
+	{
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_real_distribution<float> distrib(min, max);
+		return distrib(gen);
+	}
+
 	static float angleRad() {
 		return randF() * 2 * (float)pi;
 	}
 
 	static float angleDeg() {
 		return randF() * 360;
+	}
+
+	static float getPi()
+	{
+		return (float)pi;
 	}
 };
