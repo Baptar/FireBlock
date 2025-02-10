@@ -45,7 +45,7 @@ void Bullet::update(double _dt)
             rx++;
             cx--;
         }
-    } while (rx < 0);
+    } while (rx < 0 && !shouldDestroy);
 
     // Collision Right
     do
@@ -60,7 +60,7 @@ void Bullet::update(double _dt)
             rx--;
             cx++;
         }
-    } while (rx > 1);
+    } while (rx > 1 && !shouldDestroy);
 
     // Collision Bottom
     do
@@ -75,7 +75,7 @@ void Bullet::update(double _dt)
             ry--;
             cy++;
         }
-    } while (ry > 1);
+    } while (ry > 1 && !shouldDestroy);
 
     // Collision Top
     do
@@ -90,7 +90,7 @@ void Bullet::update(double _dt)
             ry++;
             cy--;
         }
-    } while (ry < 0);
+    } while (ry < 0 && !shouldDestroy);
 
     syncPos();
 }
