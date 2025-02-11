@@ -63,6 +63,7 @@ private:
 public:
     sf::Sprite&  getSprite();
     bool        finishedAnimDeath = false;
+    bool        finishedAnimHurt = true;
     
                 SpriteEnnemy(Ennemy& ennemy);
     void        update(double dt);

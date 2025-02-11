@@ -11,6 +11,7 @@ namespace sf
 class Ennemy
 {
 public:
+    float test;
     SpriteEnnemy spriteEnnemy;
     int         life = 5;
     bool        isDead = false;
@@ -31,7 +32,9 @@ public:
     float		fry = 0.95f;
 
     bool        dropping = false;
-    bool		moveRight = true;    
+    bool		moveRight = true;
+    bool        reculing = false;
+    float       durationRecul = 1.0f;
     
                     Ennemy(int _cx, int _cy);
     void            update(double _dt);
@@ -42,6 +45,6 @@ public:
     void			draw(sf::RenderWindow& _win);
     bool			im();
     void            setDropping(bool _onOff);
-    void            takeDamage(int _damage);
+    void            takeDamage(int _damage, bool _goingRight);
 
 };

@@ -10,12 +10,16 @@ Ennemy::Ennemy(int _cx, int _cy): spriteEnnemy(SpriteEnnemy(*this))
 	setCooGrid(_cx, _cy);
 	speedX = Dice::randFloat(speedXMin, speedXMax);
 	isDead = false;
+	test = speedX;
 }
 
 void Ennemy::update(double _dt)
 {
 	if (spriteEnnemy.finishedAnimDeath) return;
 
+	if (durationRecul > 0.0f) durationRecul -= _dt;
+	else /*reculing = false;*/ speedX = test;
+	
 	spriteEnnemy.update(_dt);
 	if (!isDead)
 	{	
@@ -26,7 +30,6 @@ void Ennemy::update(double _dt)
 		dy += gravy * _dt;
 		dy = dy * pow(fry, dfr);
 		dx = (moveRight ?  speedX : -speedX) * pow(frx, dfr);
-
 		rx += dx * _dt;
 		ry += dy * _dt;
 	
@@ -51,7 +54,6 @@ void Ennemy::update(double _dt)
 				{
 					spriteEnnemy.playAnimationSprite(0, 1);
 				}
-				moveRight = false;
 				rx++;
 				cx--;
 			}
@@ -72,7 +74,6 @@ void Ennemy::update(double _dt)
 				{
 					spriteEnnemy.playAnimationSprite(0, 1);
 				}
-				moveRight = true;
 				rx--;
 				cx++;
 			}
@@ -104,6 +105,7 @@ void Ennemy::update(double _dt)
 		}
 		syncPos();
 	}
+	
 }
 
 void Ennemy::setCooPixel(int _px, int _py)
@@ -157,16 +159,24 @@ void Ennemy::setDropping(bool _onOff)
 	}
 }
 
-void Ennemy::takeDamage(int _damage)
+void Ennemy::takeDamage(int _damage, bool _goingRight)
 {
 	printf("Ennemy::takeDamage()\n");
 	life -= _damage;
 	if (life <= 0)
 	{
+		spriteEnnemy.finishedAnimHurt = true;
 		isDead = true;
 		spriteEnnemy.playAnimationSprite(0, 2);
 	}
-	else spriteEnnemy.playAnimationSprite(0,3);
+	else
+	{
+		reculing = true;
+		float recul = abs(speedX / 2.0f);
+		speedX += _goingRight ? -recul :  recul;
+		durationRecul = 0.2;  
+		spriteEnnemy.playAnimationSprite(0,3);
+	}
 }
 
 bool Ennemy::im()

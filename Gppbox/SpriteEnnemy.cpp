@@ -17,6 +17,12 @@ void SpriteEnnemy::update(double dt)
             finishedAnimDeath = true;
             return;
         }
+        if (animationRow == 3 && currentFrame == numberOfFrameHurt - 1)
+        {
+            finishedAnimHurt = true;
+            playAnimationSprite(0, 1);
+        }
+        
         animationTime = 0;
         currentFrame = (currentFrame + 1) % numberOfFrame;
 		
@@ -27,7 +33,7 @@ void SpriteEnnemy::update(double dt)
 
 void SpriteEnnemy::playAnimationSprite(int frame, int animationRow)
 {
-    if (!(this->animationRow == animationRow)) setAnimationFrame(frame, animationRow);
+    if (!(this->animationRow == animationRow) && finishedAnimHurt) setAnimationFrame(frame, animationRow);
 }
 
 void SpriteEnnemy::CheckFileTexture()
@@ -85,6 +91,7 @@ void SpriteEnnemy::setAnimationFrame(int _frame, int _animationRow)
         numberOfFrame = numberOfFrameDead;
         break;
     case 3: // Hurt
+        finishedAnimHurt = false;
         getSprite().setTexture(textureHurtUsed);
         numberOfFrame = numberOfFrameHurt;
         break;

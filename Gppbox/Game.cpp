@@ -17,11 +17,6 @@ Game*		Game::me = 0;
 static int	cols = C::RES_X / C::GRID_SIZE;
 static int	lastLine = C::RES_Y / C::GRID_SIZE - 1;
 
-struct Data {
-	char name[50];
-	Vector2i position;
-};
-
 Game::Game(sf::RenderWindow * _win): camera({C::RES_X / 2.f, C::RES_Y / 2.f}, {C::RES_X / 2.5f, C::RES_Y / 2.5f})
 {
 	this->win = _win;
@@ -459,6 +454,7 @@ void Game::saveData(const std::filesystem::path& _filePath) const
 	}
 	for (auto ennemy : ennemies)
 	{
+		if (!ennemy->isDead)
 		out << ennemy->cx << " " << ennemy->cy << " " << 1<<"\n";
 	}
 	for (auto p : players)
