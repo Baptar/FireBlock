@@ -115,6 +115,8 @@ void SpriteEnnemy::setAnimationFrame(int _frame, int _animationRow)
         numberOfFrame = numberOfFrameRun;
         break;
     case 2: // Dead
+        sprite.setColor(sf::Color::Red);
+        durationDamage = 0.04f;
         getSprite().setTexture(textureDeadUsed);
         numberOfFrame = numberOfFrameDead;
         break;

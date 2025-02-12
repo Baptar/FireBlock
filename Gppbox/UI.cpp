@@ -29,7 +29,6 @@ void UI::draw()
 
     if (munition == 0) munitionText.setString("Munition : 0 (Press 'R' to reload)");
     else munitionText.setString("Munition :" + std::to_string(Game::me->getPlayer().actualBullets));
-    printf("%f",munitionText.getPosition().x);
     window->draw(munitionText);
     window->draw(lifeText);
 }
