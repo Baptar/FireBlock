@@ -2,7 +2,7 @@
 
 #include <list>
 #include <SFML/Graphics.hpp>
-#include "SpritePlayer.h"
+#include "SpritePlayer.hpp"
 
 class Bullet;
 
@@ -13,6 +13,10 @@ namespace sf {
 class Player{
 public:
 	SpritePlayer spritePlayer;
+	
+	int			life = 10;
+	bool		isDead = false;
+	
 	int			cx = 0;
 	int			cy = 0;
 	float		rx = 0.5f;
@@ -52,4 +56,9 @@ public:
 	void 			stopFire();
 	void			fire();
 	void			reload();
+
+	void			drawLineH(int x0, int y0, int x1, int y1);
+	void			drawLineV(int x0, int y0, int x1, int y1);
+	void 			drawLine(int x0, int y0, int x1, int y1);
+	void			takeDamage(int damage);
 };

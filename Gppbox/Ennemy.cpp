@@ -18,7 +18,7 @@ void Ennemy::update(double _dt)
 	if (spriteEnnemy.finishedAnimDeath) return;
 
 	if (durationRecul > 0.0f) durationRecul -= _dt;
-	else /*reculing = false;*/ speedX = test;
+	else recul = 0.0f;
 	
 	spriteEnnemy.update(_dt);
 	if (!isDead)
@@ -29,7 +29,7 @@ void Ennemy::update(double _dt)
 		
 		dy += gravy * _dt;
 		dy = dy * pow(fry, dfr);
-		dx = (moveRight ?  speedX : -speedX) * pow(frx, dfr);
+		dx = ((moveRight ?  speedX : -speedX) + recul) * pow(frx, dfr);
 		rx += dx * _dt;
 		ry += dy * _dt;
 	
@@ -38,10 +38,18 @@ void Ennemy::update(double _dt)
 		{
 			spriteEnnemy.playAnimationSprite(0, 0);
 		}
+		
+		if ((!Game::me->getPlayer().isDead && Game::me->hasPlayer(cx - 1, cy) && !moveRight)
+		|| (!Game::me->getPlayer().isDead && Game::me->hasPlayer(cx + 1, cy) && moveRight))
+		{
+			speedX = 0.0;
+			attack();
+		}
+		else speedX = test;
 	
 		// Collision Left
 		do
-		{
+		{			
 			if (g.hasPlayerCollision(cx - 1, cy) && rx < 0.5)
 			{
 				moveRight = true;
@@ -161,7 +169,6 @@ void Ennemy::setDropping(bool _onOff)
 
 void Ennemy::takeDamage(int _damage, bool _goingRight)
 {
-	printf("Ennemy::takeDamage()\n");
 	life -= _damage;
 	if (life <= 0)
 	{
@@ -171,11 +178,36 @@ void Ennemy::takeDamage(int _damage, bool _goingRight)
 	}
 	else
 	{
-		reculing = true;
-		float recul = abs(speedX / 2.0f);
-		speedX += _goingRight ? -recul :  recul;
-		durationRecul = 0.2;  
+		recul = abs(speedX * 1.5f );
+		//speedX += _goingRight ? recul :  -recul;
+		if (!_goingRight) recul *= -1.0f;
+		if (_goingRight == moveRight) recul *= -0.5f;
+		durationRecul = 0.2f;
 		spriteEnnemy.playAnimationSprite(0,3);
+	}
+}
+
+void Ennemy::attack()
+{
+	spriteEnnemy.playAnimationSprite(0, 4);
+}
+
+void Ennemy::attackEnd() const
+{
+	if (Game::me->getPlayer().isDead) return;
+	if (moveRight)
+	{
+		if (Game::me->hasPlayer(cx + 1, cy))
+		{
+			Game::me->getPlayer().takeDamage(1);
+		}
+	}
+	else
+	{
+		if (Game::me->hasPlayer(cx - 1, cy))
+		{
+			Game::me->getPlayer().takeDamage(1);
+		}
 	}
 }
 
@@ -185,6 +217,7 @@ bool Ennemy::im()
 
 	bool chg = false;
 
+	Value("moveRight", moveRight);
 	Value("isDead", isDead);
 	Value("Dropping", dropping);
 	Value("cx", cx);

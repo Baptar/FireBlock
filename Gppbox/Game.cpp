@@ -175,7 +175,7 @@ void Game::pollInput(double _dt) {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q) || sf::Joystick::getAxisPosition(0, Joystick::X) < -90.0f) {
 		if (players.size()) {
 			auto mainChar = players[0];
-			if (mainChar) {
+			if (mainChar && !mainChar->isDead) {
 				mainChar->moveRight = false;
 				pressingLeft = true;
 				if (mainChar->reloading) mainChar->dx = -lateralSpeed / 2.0f;
@@ -188,7 +188,7 @@ void Game::pollInput(double _dt) {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Joystick::getAxisPosition(0, Joystick::X) > 90.0f) {
 		if (players.size()) {
 			auto mainChar = players[0];
-			if (mainChar) {
+			if (mainChar && !mainChar->isDead) {
 				mainChar->moveRight = true;
 				pressingRight = true;
 				if (mainChar->reloading) mainChar->dx = lateralSpeed / 2.0f;
@@ -201,7 +201,7 @@ void Game::pollInput(double _dt) {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Joystick::isButtonPressed(0, 0)) {
 		if (players.size()) {
 			auto mainChar = players[0];
-			if (mainChar && !mainChar->jumping && !mainChar->reloading && !hasPlayerCollision(mainChar->cx, mainChar->cy - 1) && canJumpInput) {
+			if (mainChar && !mainChar->jumping && !mainChar->reloading && !hasPlayerCollision(mainChar->cx, mainChar->cy - 1) && canJumpInput && !mainChar->isDead) {
 				canJumpInput = false;
 				mainChar->dy -= 40;
 				mainChar->setJumping(true);
@@ -251,29 +251,32 @@ void Game::pollInput(double _dt) {
 				}
 			}	
 		}
-		else if (!isEditing && !getPlayer().jumping)
+		else if (!isEditing && !getPlayer().jumping && !getPlayer().isDead)
 		{
 			getPlayer().fire();
 		}
 	}
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Left)
-		&& !ImGui::IsWindowHovered()
-		&& !ImGui::IsAnyItemHovered()
-		&& !ImGui::IsAnyItemActive()
-		&& !ImGui::IsAnyItemFocused()
-		&& isEditing)
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 	{
-		int posX = (posMouse.x  / C::GRID_SIZE);
-		int posY = (posMouse.y / C::GRID_SIZE);
-		if (!hasWall(posX, posY) && editingWalls && !hasPlayer(posX, posY) && !hasEnnemy(posX, posY))
+		if (isEditing &&
+			!ImGui::IsWindowHovered() &&
+			!ImGui::IsAnyItemHovered() &&
+			!ImGui::IsAnyItemActive() &&
+			!ImGui::IsAnyItemFocused())
 		{
-			addWall(posX, posY);
-			cacheWalls();
+			int posX = (posMouse.x  / C::GRID_SIZE);
+			int posY = (posMouse.y / C::GRID_SIZE);
+			if (!hasWall(posX, posY) && editingWalls && !hasPlayer(posX, posY) && !hasEnnemy(posX, posY))
+			{
+				addWall(posX, posY);
+				cacheWalls();
+			}
+			else if (!hasWall(posX, posY) && !hasWall(posX, posY - 1) && !hasEnnemy(posX, posY) && editingEnemies && !hasPlayer(posX, posY))
+			{
+				addEnnemy(posX, posY);
+			}	
 		}
-		else if (!hasWall(posX, posY) && !hasWall(posX, posY - 1) && !hasEnnemy(posX, posY) && editingEnemies && !hasPlayer(posX, posY))
-		{
-			addEnnemy(posX, posY);
-		}	
+		else if (!isEditing && !getPlayer().jumping && !getPlayer().isDead) getPlayer().drawLine(getPlayer().cx, getPlayer().cy, getPlayer().cx + 10, getPlayer().cy);
 	}
 }
 

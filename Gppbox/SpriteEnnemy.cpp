@@ -1,4 +1,4 @@
-﻿#include "SpriteEnnemy.h"
+﻿#include "SpriteEnnemy.hpp"
 
 #include "Dice.hpp"
 #include "Ennemy.hpp"
@@ -22,6 +22,18 @@ void SpriteEnnemy::update(double dt)
             finishedAnimHurt = true;
             playAnimationSprite(0, 1);
         }
+
+        if (animationRow == 4 )
+        {
+            if (currentFrame == numberOfFrameAttack - 1 - 2)
+            ennemy.attackEnd();
+            else if (currentFrame == numberOfFrameAttack - 1)
+            {
+                finishedAnimAttack = true;
+                playAnimationSprite(0, 1);
+            }
+        }
+        
         
         animationTime = 0;
         currentFrame = (currentFrame + 1) % numberOfFrame;
@@ -33,7 +45,7 @@ void SpriteEnnemy::update(double dt)
 
 void SpriteEnnemy::playAnimationSprite(int frame, int animationRow)
 {
-    if (!(this->animationRow == animationRow) && finishedAnimHurt) setAnimationFrame(frame, animationRow);
+    if (!(this->animationRow == animationRow) && finishedAnimHurt && finishedAnimAttack) setAnimationFrame(frame, animationRow);
 }
 
 void SpriteEnnemy::CheckFileTexture()
@@ -64,6 +76,13 @@ void SpriteEnnemy::CheckFileTexture()
     if (!textureHurt4.loadFromFile("res/HurtZombie4.png")) printf("ERR : LOAD FAILED\n");
     if (!textureHurt5.loadFromFile("res/HurtZombie5.png")) printf("ERR : LOAD FAILED\n");
     if (!textureHurt6.loadFromFile("res/HurtZombie6.png")) printf("ERR : LOAD FAILED\n");
+
+    if (!textureAttack1.loadFromFile("res/AttackZombie.png")) printf("ERR : LOAD FAILED\n");
+    if (!textureAttack2.loadFromFile("res/AttackZombie2.png")) printf("ERR : LOAD FAILED\n");
+    if (!textureAttack3.loadFromFile("res/AttackZombie3.png")) printf("ERR : LOAD FAILED\n");
+    if (!textureAttack4.loadFromFile("res/AttackZombie4.png")) printf("ERR : LOAD FAILED\n");
+    if (!textureAttack5.loadFromFile("res/AttackZombie5.png")) printf("ERR : LOAD FAILED\n");
+    if (!textureAttack6.loadFromFile("res/AttackZombie6.png")) printf("ERR : LOAD FAILED\n");
 }
 
 sf::Sprite& SpriteEnnemy::getSprite(){ return sprite; }
@@ -95,6 +114,11 @@ void SpriteEnnemy::setAnimationFrame(int _frame, int _animationRow)
         getSprite().setTexture(textureHurtUsed);
         numberOfFrame = numberOfFrameHurt;
         break;
+    case 4: // Attack
+        finishedAnimAttack = false;
+        getSprite().setTexture(textureAttackUsed);
+        numberOfFrame = numberOfFrameAttack;
+        break;
     default: // Default : Idle
         getSprite().setTexture(textureIdleUsed);
         numberOfFrame = numberOfFrameIdle;
@@ -113,60 +137,73 @@ void SpriteEnnemy::InitRandomTextures()
         textureRunUsed = textureRun1;
         textureDeadUsed = textureDead1;
         textureHurtUsed = textureHurt1;
+        textureAttackUsed = textureAttack1;
         numberOfFrameIdle = 8;
         numberOfFrameRun = 7;
         numberOfFrameHurt = 3;
+        numberOfFrameAttack = 5;
         break;
     case 1:
         textureIdleUsed = textureIdle2;
         textureRunUsed = textureRun2;
         textureDeadUsed = textureDead2;
         textureHurtUsed = textureHurt2;
+        textureAttackUsed = textureAttack2;
         numberOfFrameIdle = 8;
         numberOfFrameRun = 7;
         numberOfFrameHurt = 3;
+        numberOfFrameAttack = 4;
         break;
     case 2:
         textureIdleUsed = textureIdle3;
         textureRunUsed = textureRun3;
         textureDeadUsed = textureDead3;
         textureHurtUsed = textureHurt3;
+        textureAttackUsed = textureAttack3;
         numberOfFrameIdle = 8;
         numberOfFrameRun = 7;
         numberOfFrameHurt = 4;
+        numberOfFrameAttack = 5;
         break;
     case 3:
         textureIdleUsed = textureIdle4;
         textureRunUsed = textureRun4;
         textureDeadUsed = textureDead4;
         textureHurtUsed = textureHurt4;
+        textureAttackUsed = textureAttack4;
         numberOfFrameIdle = 6;
         numberOfFrameRun = 10;
         numberOfFrameHurt = 4;
+        numberOfFrameAttack = 5;
         break;
     case 4:
         textureIdleUsed = textureIdle5;
         textureRunUsed = textureRun5;
         textureDeadUsed = textureDead5;
         textureHurtUsed = textureHurt5;
+        textureAttackUsed = textureAttack5;
         numberOfFrameIdle = 6;
         numberOfFrameRun = 10;
         numberOfFrameHurt = 4;
+        numberOfFrameAttack = 4;
         break;
     case 5:
         textureIdleUsed = textureIdle6;
         textureRunUsed = textureRun6;
         textureDeadUsed = textureDead6;
         textureHurtUsed = textureHurt6;
+        textureAttackUsed = textureAttack6;
         numberOfFrameIdle = 6;
         numberOfFrameRun = 10;
         numberOfFrameHurt = 4;
+        numberOfFrameAttack = 10;
         break;
     default:
         textureIdleUsed = textureIdle1;
         textureRunUsed = textureRun1;
         textureDeadUsed = textureDead1;
         textureHurtUsed = textureHurt1;
+        textureAttackUsed = textureAttack1;
         numberOfFrameIdle = 8;
         numberOfFrameRun = 7;
         numberOfFrameHurt = 4;

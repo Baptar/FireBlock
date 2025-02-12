@@ -1,4 +1,4 @@
-﻿#include "Bullet.h"
+﻿#include "Bullet.hpp"
 
 #include "C.hpp"
 #include "imgui.h"
@@ -134,7 +134,7 @@ void Bullet::im()
     using namespace ImGui;
 
     bool chg = false;
-	
+    
     Value("speedX", speedX);
     Value("speedY", speedY);
     Value("bloom", bloom);

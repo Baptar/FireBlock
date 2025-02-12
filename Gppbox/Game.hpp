@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <vector>
 
-#include "CameraManager.h"
+#include "CameraManager.hpp"
 #include "Ennemy.hpp"
 #include "SFML/Graphics.hpp"
 #include "SFML/Window.hpp"

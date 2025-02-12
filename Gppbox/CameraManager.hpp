@@ -2,7 +2,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "Player.hpp"
-#include "SecondOrderDynamics.h"
+#include "SecondOrderDynamics.hpp"
 
 class CameraManager
 {

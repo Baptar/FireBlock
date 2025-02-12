@@ -1,4 +1,4 @@
-﻿#include "SpritePlayer.h"
+﻿#include "SpritePlayer.hpp"
 
 #include "Player.hpp"
 
@@ -28,6 +28,18 @@ void SpritePlayer::update(double _dt)
             player.reloading = false;
             setAnimationFrame(0, 0);
         }
+        // Hurt
+        else if (animationRow == 7 && currentFrame == 4)
+        {
+            isHurting = false;
+            setAnimationFrame(0, 0);
+        }
+        // death
+        else if (animationRow == 9 && currentFrame == 4)
+        {
+            player.isDead = true;
+            return;
+        }
 		
         else
         {
@@ -38,7 +50,7 @@ void SpritePlayer::update(double _dt)
 
 void SpritePlayer::playAnimationSprite(int _frame, int _animationRow)
 {
-    if (!(this->animationRow == _animationRow)) setAnimationFrame(_frame, _animationRow);
+    if (!(this->animationRow == _animationRow) && !isHurting) setAnimationFrame(_frame, _animationRow);
 }
 
 void SpritePlayer::CheckFileTexture()
@@ -103,6 +115,7 @@ void SpritePlayer::setAnimationFrame(int _frame, int _animationRow)
         numberOfFrame = 4;
         break;
     case 7:
+        isHurting = true;
         sprite.setTexture(textureHurt);
         numberOfFrame = 5;
         break;

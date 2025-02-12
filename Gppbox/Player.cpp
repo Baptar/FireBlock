@@ -2,7 +2,7 @@
 
 #include "Player.hpp"
 
-#include "Bullet.h"
+#include "Bullet.hpp"
 #include "C.hpp"
 #include "Game.hpp"
 
@@ -11,7 +11,16 @@ Player::Player(): spritePlayer(SpritePlayer(*this))
 }
 
 void Player::update(double dt){
+	
+	drawLine(cx, cy, cx + 3, cy - 1);
+	if (isDead)
+	{
+		spritePlayer.setAnimationFrame(4,9);
+		return;
+	}
+	
 	spritePlayer.update(dt);
+	
 	
 	for (auto it = bullets.begin(); it != bullets.end(); ) {
 		Bullet* bullet = *it;
@@ -220,6 +229,92 @@ void Player::reload()
 	spritePlayer.playAnimationSprite(0, 8);
 }
 
+void Player::drawLineH(int x0, int y0, int x1, int y1)
+{
+	if (x0 > x1) {
+		std::swap(x0, x1);
+		std::swap(y0, y1);
+	}
+
+	int dx = x1 - x0;
+	int dy = y1 - y0;
+
+	int dir = (dy < 0) ? -1 : 1;
+	dy *= dir;
+
+	if (dx != 0) {
+		int y = y0;
+		int p = 2 * dy - dx;
+
+		for (int i = 0; i <= dx; i++) {
+			//putPixel(x0 + i, y);
+
+			printf("x : %d", x0 + i);
+			printf(", y : %d\n", y);
+			sf::RectangleShape rect = sf::RectangleShape(sf::Vector2f(1.0f, 1.0f));
+			rect.setFillColor(Color::White);
+			rect.setPosition(x0 + i, y);
+			Game::me->win->draw(rect);
+			
+			if (p >= 0) {
+				y += dir;
+				p -= 2 * dx;
+			}
+			p += 2 * dy;
+		}
+	}
+}
+
+void Player::drawLineV(int x0, int y0, int x1, int y1)
+{
+	if (y0 > y1) {
+        std::swap(x0, x1);
+        std::swap(y0, y1);
+    }
+
+    int dx = x1 - x0;
+    int dy = y1 - y0;
+
+    int dir = (dx < 0) ? -1 : 1;
+    dx *= dir;
+
+    if (dy != 0) {
+        int x = x0;
+        int p = 2 * dx - dy;
+
+        for (int i = 0; i <= dy; i++) {
+            //putPixel(x, y0 + i);			
+        	sf::Vertex point(sf::Vector2f(x, y0 + i), sf::Color::White);
+        	Game::me->win->draw(&point, 1, sf::Points);
+            if (p >= 0) {
+                x += dir;
+                p -= 2 * dy;
+            }
+            p += 2 * dx;
+        }
+    }
+}
+
+void Player::drawLine(int x0, int y0, int x1, int y1)
+{
+	if (abs(x1 - x0) > abs(y1 - y0)) drawLineH(x0, y0, x1, y1);
+	else drawLineV(x0, y0, x1, y1);
+}
+
+void Player::takeDamage(int damage)
+{
+	life -= damage;
+	if (life <= 0)
+	{
+		spritePlayer.isHurting = false;
+		spritePlayer.playAnimationSprite(0, 9);
+	}
+	else
+	{
+		spritePlayer.playAnimationSprite(0, 7);
+	}
+}
+
 bool Player::im()
 {
 	using namespace ImGui;
@@ -230,6 +325,7 @@ bool Player::im()
 			b->im();
 		TreePop();
 	}
+	Value("life", life);
 	Value("animation Row", spritePlayer.animationRow);
 	Value("currentFrame", spritePlayer.currentFrame);
 	Value("jumping", jumping);
