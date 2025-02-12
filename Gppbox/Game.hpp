@@ -24,6 +24,10 @@ public:
 	sf::Texture						texBG;
 	HotReloadShader *				bgShader = nullptr;
 	CameraManager					camera;
+
+	sf::Font						font;
+	sf::Text						gameOverText;
+	sf::Text						munitionText;
 	
 	float							zoom = 0.28f;
 	float							f = 0.7f;

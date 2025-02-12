@@ -28,6 +28,23 @@ Game::Game(sf::RenderWindow * _win): camera({C::RES_X / 2.f, C::RES_Y / 2.f}, {C
 	bg.setTexture(&texBG);
 	bg.setSize(sf::Vector2f(C::RES_X, C::RES_Y));
 	if (!textureWall_x4.loadFromFile("res/wall_x4.png")) printf("ERR : LOAD FAILED\n");
+	
+	if (!font.loadFromFile("res/MAIAN.ttf")) { printf("ERR : FONT LOAD FAILED\n"); }
+	gameOverText.setFont(font);
+	gameOverText.setString("GAME OVER");
+	gameOverText.setCharacterSize(60);
+	gameOverText.setFillColor(sf::Color::Red);
+	gameOverText.setStyle(sf::Text::Bold);
+	
+	munitionText.setFont(font);
+	munitionText.setCharacterSize(5);
+	munitionText.setFillColor(sf::Color::White);
+	munitionText.setStyle(sf::Text::Bold);
+	//munitionText.setPosition(win->getSize().x / 2, win->getSize().y / 2);
+	
+	// Centrer le texte (ancre au centre)
+	sf::FloatRect textRect = gameOverText.getLocalBounds();
+	gameOverText.setOrigin(textRect.width / 2.f, textRect.height / 2.f);
 
 	bgShader = new HotReloadShader("res/bg.vert", "res/bg.frag");
 
@@ -251,7 +268,7 @@ void Game::pollInput(double _dt) {
 				}
 			}	
 		}
-		else if (!isEditing && !getPlayer().jumping && !getPlayer().isDead)
+		else if (!isEditing && !getPlayer().jumping && !getPlayer().isDead && getPlayer().life > 0 && !getPlayer().spritePlayer.isHurting)
 		{
 			getPlayer().fire();
 		}
@@ -350,7 +367,17 @@ void Game::update(double _dt) {
 
 	for (auto e: players)
 		e->draw(_win);
-		
+
+	if (getPlayer().isDead && !isEditing) {
+		gameOverText.setPosition(win->getView().getCenter() - Vector2f(0.0f, 10.0f));
+		_win.draw(gameOverText);
+	}
+	else if (!getPlayer().isDead && !isEditing)
+	{
+		munitionText.setString("Munitions : " + to_string(5));
+		//munitionText.setPosition(win->getView().getCenter() - Vector2f(std::round(win->getView().getSize().x / 2 - 5), int(-win->getView().getSize().y / 2 + 10)));
+		_win.draw(munitionText);
+	}
 
 	afterParts.draw(_win);
 	_win.setView(defaultView);

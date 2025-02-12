@@ -13,15 +13,7 @@ Player::Player(): spritePlayer(SpritePlayer(*this))
 void Player::update(double dt){
 	
 	drawLine(cx, cy, cx + 3, cy - 1);
-	if (isDead)
-	{
-		spritePlayer.setAnimationFrame(4,9);
-		return;
-	}
-	
-	spritePlayer.update(dt);
-	
-	
+		
 	for (auto it = bullets.begin(); it != bullets.end(); ) {
 		Bullet* bullet = *it;
 		if (bullet == nullptr) it = bullets.erase(it);
@@ -33,6 +25,14 @@ void Player::update(double dt){
 			++it;
 		}
 	}
+	
+	if (isDead)
+	{
+		spritePlayer.setAnimationFrame(4,9);
+		return;
+	}
+	
+	spritePlayer.update(dt);
 	
 	Game& g = *Game::me;
 	double rate = 1.0 / dt;

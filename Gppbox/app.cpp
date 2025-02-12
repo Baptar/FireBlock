@@ -21,6 +21,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
+#include "UI.h"
+
 extern "C" {
 	// Force the use of the NVidia-graphics card on notebooks with both an IGP and a GPU
 	_declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
@@ -71,6 +73,8 @@ int main()
 
 	// init game
     Game g(&window);
+
+	UI ui(&window);
 	
 	Vector2i winPos;
 	
@@ -165,7 +169,8 @@ int main()
 		g.im();
     	
     	g.draw(window);
-    	
+
+    	ui.draw();
 		window.draw(fpsCounter);
 
     	// Bloom Management

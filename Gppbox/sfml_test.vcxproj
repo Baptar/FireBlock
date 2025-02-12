@@ -206,7 +206,7 @@
     <ClInclude Include="SpriteEnnemy.hpp" />
     <ClInclude Include="SpritePlayer.hpp" />
     <ClInclude Include="sys.hpp" />
-    <ClInclude Include="UI.hpp" />
+    <ClInclude Include="UI.h" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="save.sav" />
