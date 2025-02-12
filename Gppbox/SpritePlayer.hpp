@@ -31,6 +31,7 @@ private:
 
     
 public:
+    float        durationDamage;
     bool         isHurting = false;
     bool         isDieing = false;
     int			 currentFrame = 0;

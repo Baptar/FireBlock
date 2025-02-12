@@ -10,6 +10,15 @@ SpritePlayer::SpritePlayer(Player& _player): player(_player)
 
 void SpritePlayer::update(double _dt)
 {
+    if (durationDamage > 0.0f)
+    {
+        durationDamage -= _dt;
+    }
+    else
+    {
+        sprite.setColor(sf::Color::White);
+    }
+    
     animationTime += _dt;
     if (animationTime >= frameSpeed) {
         animationTime = 0;
@@ -118,6 +127,8 @@ void SpritePlayer::setAnimationFrame(int _frame, int _animationRow)
         break;
     case 7:
         isHurting = true;
+        sprite.setColor(sf::Color::Red);
+        durationDamage = 0.1f;
         sprite.setTexture(textureHurt);
         numberOfFrame = 5;
         break;

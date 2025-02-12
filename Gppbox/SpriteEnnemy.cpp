@@ -11,6 +11,15 @@ SpriteEnnemy::SpriteEnnemy(Ennemy& ennemy) : ennemy(ennemy)
 
 void SpriteEnnemy::update(double dt)
 {
+    if (durationDamage > 0.0f)
+    {
+        durationDamage -= dt;
+    }
+    else
+    {
+        sprite.setColor(sf::Color::White);
+    }
+    
     if (animationTime >= frameSpeed) {
         if (animationRow == 2 && currentFrame == numberOfFrameDead - 1)
         {
@@ -110,6 +119,8 @@ void SpriteEnnemy::setAnimationFrame(int _frame, int _animationRow)
         numberOfFrame = numberOfFrameDead;
         break;
     case 3: // Hurt
+        sprite.setColor(sf::Color::Red);
+        durationDamage = 0.04f;
         finishedAnimHurt = false;
         getSprite().setTexture(textureHurtUsed);
         numberOfFrame = numberOfFrameHurt;

@@ -50,6 +50,7 @@ private:
     sf::Texture textureHurtUsed;
     sf::Texture textureAttackUsed;
 
+    float       durationDamage;
     int			currentFrame = 0;   
     float		animationTime = 0;  
     float		frameSpeed = 0.1f;
