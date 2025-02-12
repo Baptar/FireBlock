@@ -66,7 +66,7 @@ private:
     
     void        CheckFileTexture();
     void        InitRandomTextures();
-    void        setAnimationFrame(int frame, int animationRow);
+
     
 public:
     sf::Sprite&  getSprite();
@@ -76,6 +76,7 @@ public:
     
                 SpriteEnnemy(Ennemy& ennemy);
     void        update(double dt);
+    void        setAnimationFrame(int frame, int animationRow);
     void        playAnimationSprite(int frame, int animationRow);
     
 };

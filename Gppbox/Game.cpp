@@ -301,22 +301,13 @@ void Game::update(double _dt) {
 	
 	if (!isEditing)
 	{
-		//bg.setOrigin(bg.getSize().x / 2, bg.getSize().y / 2);
-		//bg.setPosition(cameraView.getCenter());
-		//bg.setSize(Vector2f(C::RES_X * zoom, C::RES_Y * zoom));
-
 		for (auto e : players) 
 			e->update(_dt);
 
 		for (auto e : ennemies)
 			e->update(_dt);
 	}
-	else
-	{
-		//bg.setOrigin(win->getDefaultView().getCenter());
-		//bg.setPosition(win->getDefaultView().getCenter());
 		//bg.setSize(Vector2f(win->getSize().x, win->getSize().y));
-	}
 	afterParts.update(_dt);
 
 	camera.update(_dt);

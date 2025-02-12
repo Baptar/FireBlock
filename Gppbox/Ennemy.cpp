@@ -174,7 +174,7 @@ void Ennemy::takeDamage(int _damage, bool _goingRight)
 	{
 		spriteEnnemy.finishedAnimHurt = true;
 		isDead = true;
-		spriteEnnemy.playAnimationSprite(0, 2);
+		spriteEnnemy.setAnimationFrame(0, 2);
 	}
 	else
 	{

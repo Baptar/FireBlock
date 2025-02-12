@@ -182,6 +182,7 @@
     <ClCompile Include="SpriteEnnemy.cpp" />
     <ClCompile Include="SpritePlayer.cpp" />
     <ClCompile Include="sys.cpp" />
+    <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app.h" />
@@ -205,6 +206,7 @@
     <ClInclude Include="SpriteEnnemy.hpp" />
     <ClInclude Include="SpritePlayer.hpp" />
     <ClInclude Include="sys.hpp" />
+    <ClInclude Include="UI.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="save.sav" />

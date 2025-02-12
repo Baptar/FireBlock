@@ -13,7 +13,7 @@ class Ennemy
 public:
     float test;
     SpriteEnnemy spriteEnnemy;
-    int         life = 100;
+    int         life = 5;
     bool        isDead = false;
     
     int			cx = 0;
