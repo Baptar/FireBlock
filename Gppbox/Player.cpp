@@ -12,7 +12,7 @@ Player::Player(): spritePlayer(SpritePlayer(*this))
 
 void Player::update(double dt){
 	
-	drawLine(cx, cy, cx + 3, cy - 1);
+	//drawLine((cx + rx) * C::GRID_SIZE, (cy + ry) * C::GRID_SIZE, (cx + rx) * C::GRID_SIZE + (moveRight ? 10 * C::GRID_SIZE : -10 * C::GRID_SIZE), (cy + ry) * C::GRID_SIZE);
 		
 	for (auto it = bullets.begin(); it != bullets.end(); ) {
 		Bullet* bullet = *it;
@@ -208,10 +208,16 @@ void Player::stopFire()
 void Player::fire()
 {
 	if (reloading || jumping || delayFire > 0) return;
+	if (actualBullets <= 0)
+	{
+		stopFire();
+		return;
+	}
 	delayFire = 0.1f;
 	Game::me->camera.addShake(cameraShakeAmplitude, cameraShakeFrequency, cameraShakeDuration);
 	
 	// Start Fire System
+	actualBullets--;
 	dx += moveRight ? -reculPower : reculPower;
 	firing = true;
 	if (dx > 2.0f || dx < -2.0f) spritePlayer.playAnimationSprite(spritePlayer.currentFrame + 1, 10);
@@ -225,7 +231,6 @@ void Player::reload()
 	if (reloading || jumping) return;
 
 	stopFire();
-	reloading = true;
 	spritePlayer.playAnimationSprite(0, 8);
 }
 
@@ -251,7 +256,7 @@ void Player::drawLineH(int x0, int y0, int x1, int y1)
 
 			printf("x : %d", x0 + i);
 			printf(", y : %d\n", y);
-			sf::RectangleShape rect = sf::RectangleShape(sf::Vector2f(1.0f, 1.0f));
+			sf::RectangleShape rect = sf::RectangleShape(sf::Vector2f(3.0f, 3.0f));
 			rect.setFillColor(Color::White);
 			rect.setPosition(x0 + i, y);
 			Game::me->win->draw(rect);
@@ -304,8 +309,9 @@ void Player::drawLine(int x0, int y0, int x1, int y1)
 void Player::takeDamage(int damage)
 {
 	life -= damage;
-	if (life <= 0)
+	if (life <= 0 && !spritePlayer.isDieing)
 	{
+		//spritePlayer.isDieing = true;
 		spritePlayer.isHurting = false;
 		spritePlayer.playAnimationSprite(0, 9);
 	}

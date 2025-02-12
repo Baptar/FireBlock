@@ -32,6 +32,7 @@ private:
     
 public:
     bool         isHurting = false;
+    bool         isDieing = false;
     int			 currentFrame = 0;
     int			 animationRow = 0; // 0 = idle, 1 = walk, 2 = run, 3 = jump
     sf::Sprite&  getSprite();

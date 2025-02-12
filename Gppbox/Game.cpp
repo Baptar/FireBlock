@@ -126,7 +126,7 @@ void Game::processInput(sf::Event _ev) {
 	
 	if (_ev.type == sf::Event::KeyReleased) {
 		if (_ev.key.code == Keyboard::R) {
-			getPlayer().reload();
+			if (getPlayer().actualBullets != getPlayer().maxBullets) getPlayer().reload();
 		}
 		if (_ev.key.code == Keyboard::Q) {
 			pressingLeft = false;
@@ -192,7 +192,7 @@ void Game::pollInput(double _dt) {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q) || sf::Joystick::getAxisPosition(0, Joystick::X) < -90.0f) {
 		if (players.size()) {
 			auto mainChar = players[0];
-			if (mainChar && !mainChar->isDead) {
+			if (mainChar && !mainChar->isDead && !mainChar->spritePlayer.isDieing) {
 				mainChar->moveRight = false;
 				pressingLeft = true;
 				if (mainChar->reloading) mainChar->dx = -lateralSpeed / 2.0f;
@@ -205,7 +205,7 @@ void Game::pollInput(double _dt) {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Joystick::getAxisPosition(0, Joystick::X) > 90.0f) {
 		if (players.size()) {
 			auto mainChar = players[0];
-			if (mainChar && !mainChar->isDead) {
+			if (mainChar && !mainChar->isDead && !mainChar->spritePlayer.isDieing) {
 				mainChar->moveRight = true;
 				pressingRight = true;
 				if (mainChar->reloading) mainChar->dx = lateralSpeed / 2.0f;
@@ -218,7 +218,7 @@ void Game::pollInput(double _dt) {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Joystick::isButtonPressed(0, 0)) {
 		if (players.size()) {
 			auto mainChar = players[0];
-			if (mainChar && !mainChar->jumping && !mainChar->reloading && !hasPlayerCollision(mainChar->cx, mainChar->cy - 1) && canJumpInput && !mainChar->isDead) {
+			if (mainChar && !mainChar->jumping && !mainChar->reloading && !hasPlayerCollision(mainChar->cx, mainChar->cy - 1) && canJumpInput && !mainChar->isDead && !mainChar->spritePlayer.isDieing) {
 				canJumpInput = false;
 				mainChar->dy -= 40;
 				mainChar->setJumping(true);
@@ -268,7 +268,7 @@ void Game::pollInput(double _dt) {
 				}
 			}	
 		}
-		else if (!isEditing && !getPlayer().jumping && !getPlayer().isDead && getPlayer().life > 0 && !getPlayer().spritePlayer.isHurting)
+		else if (!isEditing && !getPlayer().jumping && !getPlayer().isDead && !getPlayer().spritePlayer.isDieing && getPlayer().life > 0 && !getPlayer().spritePlayer.isHurting)
 		{
 			getPlayer().fire();
 		}
@@ -293,7 +293,7 @@ void Game::pollInput(double _dt) {
 				addEnnemy(posX, posY);
 			}	
 		}
-		else if (!isEditing && !getPlayer().jumping && !getPlayer().isDead) getPlayer().drawLine(getPlayer().cx, getPlayer().cy, getPlayer().cx + 10, getPlayer().cy);
+		else if (!isEditing && !getPlayer().jumping && !getPlayer().isDead  && !getPlayer().spritePlayer.isDieing) getPlayer().drawLine(getPlayer().cx, getPlayer().cy, getPlayer().cx + 10, getPlayer().cy);
 	}
 }
 
@@ -372,7 +372,7 @@ void Game::update(double _dt) {
 		gameOverText.setPosition(win->getView().getCenter() - Vector2f(0.0f, 10.0f));
 		_win.draw(gameOverText);
 	}
-	else if (!getPlayer().isDead && !isEditing)
+	else if (!getPlayer().isDead && !getPlayer().spritePlayer.isDieing && !isEditing)
 	{
 		munitionText.setString("Munitions : " + to_string(5));
 		//munitionText.setPosition(win->getView().getCenter() - Vector2f(std::round(win->getView().getSize().x / 2 - 5), int(-win->getView().getSize().y / 2 + 10)));

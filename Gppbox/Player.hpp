@@ -16,6 +16,8 @@ public:
 	
 	int			life = 10;
 	bool		isDead = false;
+	int			maxBullets = 64;
+	int			actualBullets = maxBullets;
 	
 	int			cx = 0;
 	int			cy = 0;

@@ -26,6 +26,7 @@ void SpritePlayer::update(double _dt)
         {
             //Finished to reload
             player.reloading = false;
+            player.actualBullets = player.maxBullets;
             setAnimationFrame(0, 0);
         }
         // Hurt
@@ -50,7 +51,7 @@ void SpritePlayer::update(double _dt)
 
 void SpritePlayer::playAnimationSprite(int _frame, int _animationRow)
 {
-    if (!(this->animationRow == _animationRow) && !isHurting) setAnimationFrame(_frame, _animationRow);
+    if (!(this->animationRow == _animationRow) && !isHurting && !isDieing) setAnimationFrame(_frame, _animationRow);
 }
 
 void SpritePlayer::CheckFileTexture()
@@ -79,6 +80,7 @@ void SpritePlayer::InitTexture()
 
 void SpritePlayer::setAnimationFrame(int _frame, int _animationRow)
 {
+    player.reloading = false;
     animationTime = 0.0f;
     this->animationRow = _animationRow;
     this->currentFrame = _frame % numberOfFrame;
@@ -120,10 +122,12 @@ void SpritePlayer::setAnimationFrame(int _frame, int _animationRow)
         numberOfFrame = 5;
         break;
     case 8:
+        player.reloading = true;
         sprite.setTexture(textureReload);
         numberOfFrame = 17;
         break;
     case 9:
+        isDieing = true;
         sprite.setTexture(textureDeath);
         numberOfFrame = 5;
         break;
