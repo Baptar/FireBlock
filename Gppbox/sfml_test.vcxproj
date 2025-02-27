@@ -167,6 +167,7 @@
     <ClCompile Include="Bloom.cpp" />
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="CameraManager.cpp" />
+    <ClCompile Include="HomingMissile.cpp" />
     <ClCompile Include="SecondOrderDynamics.cpp" />
     <ClCompile Include="Ennemy.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -180,6 +181,7 @@
     <ClCompile Include="app.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="SpriteEnnemy.cpp" />
+    <ClCompile Include="SpriteExplosion.cpp" />
     <ClCompile Include="SpritePlayer.cpp" />
     <ClCompile Include="sys.cpp" />
     <ClCompile Include="UI.cpp" />
@@ -190,6 +192,7 @@
     <ClInclude Include="Bullet.hpp" />
     <ClInclude Include="C.hpp" />
     <ClInclude Include="CameraManager.hpp" />
+    <ClInclude Include="HomingMissile.hpp" />
     <ClInclude Include="SecondOrderDynamics.hpp" />
     <ClInclude Include="Dice.hpp" />
     <ClInclude Include="Ennemy.hpp" />
@@ -204,8 +207,10 @@
     <ClInclude Include="Particle.hpp" />
     <ClInclude Include="ParticleMan.hpp" />
     <ClInclude Include="SpriteEnnemy.hpp" />
+    <ClInclude Include="SpriteExplosion.h" />
     <ClInclude Include="SpritePlayer.hpp" />
     <ClInclude Include="sys.hpp" />
+    <ClInclude Include="Tween.hpp" />
     <ClInclude Include="UI.h" />
   </ItemGroup>
   <ItemGroup>

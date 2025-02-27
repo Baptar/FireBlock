@@ -145,21 +145,18 @@ void Game::processInput(sf::Event _ev) {
 	{
 		if (_ev.joystickButton.button == 0) //bottom
 		{
-			auto mainChar = players[0];
-			if (mainChar && !mainChar->jumping && !mainChar->reloading && canJumpInput) {
-				canJumpInput = false;
-				mainChar->setJumping(true);
-				
-			}
+			canJumpInput = true;
 		}
 		if (_ev.joystickButton.button == 1) // right
 		{
+			getPlayer().fireMissile();
 		}
 		if (_ev.joystickButton.button == 2) // left
 		{
+			if (getPlayer().actualBullets != getPlayer().maxBullets) getPlayer().reload();
 		}
 		if (_ev.joystickButton.button == 3) // top
-		{
+		{ 
 		}
 		if (_ev.joystickButton.button == 5) // R1
 		{
@@ -174,6 +171,14 @@ void Game::processInput(sf::Event _ev) {
 			auto mainChar = players[0];
 			if (mainChar) {
 				mainChar->stopFire();
+			}
+		}
+		if (_ev.mouseButton.button == sf::Mouse::Left)
+		{
+			// Stop Fire
+			auto mainChar = players[0];
+			if (mainChar) {
+				mainChar->StopFireLaser();
 			}
 		}
 	}
@@ -200,6 +205,7 @@ void Game::pollInput(double _dt) {
 			}
 		}
 	}
+	else pressingLeft = false;
 	
 	// Move Right
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Joystick::getAxisPosition(0, Joystick::X) > 90.0f) {
@@ -214,6 +220,8 @@ void Game::pollInput(double _dt) {
 		}
 	}
 	
+	else pressingRight = false;
+	
 	// Jump
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Joystick::isButtonPressed(0, 0)) {
 		if (players.size()) {
@@ -225,19 +233,9 @@ void Game::pollInput(double _dt) {
 			}
 		}
 	}
-	
-	// Adjust power of Jump
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)|| sf::Joystick::isButtonPressed(0, 0)) {
-		if (!wasPressed) {
-			onSpacePressed();
-			wasPressed = true;
-		}
-	}
-	else {
-		wasPressed = false;
-	}
 
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
+	// R2
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Right) || sf::Joystick::getAxisPosition(0, Joystick::Z) < -90.0f)
 	{
 		if (isEditing && !ImGui::IsWindowHovered()
 		&& !ImGui::IsAnyItemHovered()
@@ -268,18 +266,29 @@ void Game::pollInput(double _dt) {
 				}
 			}	
 		}
-		else if (!isEditing && !getPlayer().jumping && !getPlayer().isDead && !getPlayer().spritePlayer.isDieing && getPlayer().life > 0 && !getPlayer().spritePlayer.isHurting)
+		else if (!isEditing && !ImGui::IsWindowHovered() &&
+			!ImGui::IsAnyItemHovered() &&
+			!ImGui::IsAnyItemActive() &&
+			!ImGui::IsAnyItemFocused() && !getPlayer().jumping && !getPlayer().isDead && !getPlayer().spritePlayer.isDieing && getPlayer().life > 0 && !getPlayer().spritePlayer.isHurting && !getPlayer().firingLaser)
 		{
+			firing = true;
 			getPlayer().fire();
 		}
 	}
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+	else if (firing)
+	{
+		firing = false;
+		getPlayer().stopFire();
+	}
+
+	// L2
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) || sf::Joystick::getAxisPosition(0, Joystick::Z) > 90.0f)
 	{
 		if (isEditing &&
-			!ImGui::IsWindowHovered() &&
-			!ImGui::IsAnyItemHovered() &&
-			!ImGui::IsAnyItemActive() &&
-			!ImGui::IsAnyItemFocused())
+		!ImGui::IsWindowHovered() &&
+		!ImGui::IsAnyItemHovered() &&
+		!ImGui::IsAnyItemActive() &&
+		!ImGui::IsAnyItemFocused())
 		{
 			int posX = (posMouse.x  / C::GRID_SIZE);
 			int posY = (posMouse.y / C::GRID_SIZE);
@@ -293,7 +302,19 @@ void Game::pollInput(double _dt) {
 				addEnnemy(posX, posY);
 			}	
 		}
-		else if (!isEditing && !getPlayer().jumping && !getPlayer().isDead  && !getPlayer().spritePlayer.isDieing) getPlayer().drawLine(getPlayer().cx, getPlayer().cy, getPlayer().cx + 10, getPlayer().cy);
+		else if (!isEditing && !ImGui::IsWindowHovered() &&
+			!ImGui::IsAnyItemHovered() &&
+			!ImGui::IsAnyItemActive() &&
+			!ImGui::IsAnyItemFocused() && !getPlayer().jumping && !getPlayer().isDead && !getPlayer().reloading  && !getPlayer().spritePlayer.isDieing && !getPlayer().firing)
+		{
+			firingLaser = true;
+			getPlayer().fireLaser(_dt);
+		}
+	}
+	else if (firingLaser)
+	{
+		firingLaser = false;
+		getPlayer().StopFireLaser();
 	}
 }
 
@@ -331,7 +352,7 @@ void Game::update(double _dt) {
 	posMouse = sf::Mouse::getPosition(*win);
 }
 
- void Game::draw(sf::RenderWindow & _win) {
+void Game::draw(sf::RenderWindow & _win) {
 	if (closing) return;
 
 	sf::RenderStates states = sf::RenderStates::Default;
@@ -383,8 +404,7 @@ void Game::update(double _dt) {
 	_win.setView(defaultView);
 }
 
-void Game::onSpacePressed() {
-}
+void Game::onSpacePressed() {}
 
 bool Game::hasPlayerCollision(int _cx, int _cy)
 {

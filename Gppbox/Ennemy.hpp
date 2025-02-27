@@ -13,7 +13,7 @@ class Ennemy
 public:
     float test;
     SpriteEnnemy spriteEnnemy;
-    int         life = 5;
+    float         life = 7.0f;
     bool        isDead = false;
     
     int			cx = 0;
@@ -45,7 +45,7 @@ public:
     void			draw(sf::RenderWindow& _win);
     bool			im();
     void            setDropping(bool _onOff);
-    void            takeDamage(int _damage, bool _goingRight);
+    void            takeDamage(float _damage, bool _goingRight);
     void            attack();
     void            attackEnd() const;
 

@@ -2,6 +2,9 @@
 
 #include <list>
 #include <SFML/Graphics.hpp>
+
+#include "HomingMissile.hpp"
+#include "SpriteExplosion.h"
 #include "SpritePlayer.hpp"
 
 class Bullet;
@@ -13,11 +16,25 @@ namespace sf {
 class Player{
 public:
 	SpritePlayer spritePlayer;
+
+	int			missileNumber = 3;
+	
+	float		maxTimeLaser = 5.0f;
+	float		currentTimeLaser = maxTimeLaser;
+	float		delayStartRecupLaser = 3.0f;
+	float		laserPixelSize = 2.0f;
+	int			laserRange = 15;
+	std::vector<sf::RectangleShape*> laserSprites;
+
 	
 	int			life = 10;
 	bool		isDead = false;
 	int			maxBullets = 64;
 	int			actualBullets = maxBullets;
+
+	float		cameraShakeAmplitude = 1.2f;
+	float		cameraShakeFrequency = 0.2f;
+	float		cameraShakeDuration = 0.2f;
 	
 	int			cx = 0;
 	int			cy = 0;
@@ -33,17 +50,18 @@ public:
 	float		fry = 0.95f;
 
 	bool		reloading = false;
+	bool		missileLunch = false;
 	bool		firing = false;
+	bool		firingLaser = false;
 	bool		jumping = false;
 	bool		crouching = false;
 	bool		moveRight = true;
 	float		delayFire = 0.0f;
 
-	float cameraShakeAmplitude = 1.2f;
-	float cameraShakeFrequency = 0.2f;
-	float cameraShakeDuration = 0.2f;
+	
 
 	std::list<Bullet*> bullets;
+	std::list<HomingMissile*> missiles;
 
 					Player();
 	void			update( double dt );
@@ -57,10 +75,12 @@ public:
 	void			setJumping(bool onOff);
 	void 			stopFire();
 	void			fire();
+	void			fireMissile();
 	void			reload();
-
-	void			drawLineH(int x0, int y0, int x1, int y1);
-	void			drawLineV(int x0, int y0, int x1, int y1);
-	void 			drawLine(int x0, int y0, int x1, int y1);
+	
 	void			takeDamage(int damage);
+	void			drawLaser(int x0, int y0, int x1, int y1);
+	void			createLaserPixel(int x, int y);
+	void			fireLaser(double dt);
+	void			StopFireLaser();
 };

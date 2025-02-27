@@ -9,6 +9,9 @@ public:
     sf::Text gameOverText;
     sf::Text munitionText;
     sf::Text lifeText;
+    sf::Text laserText;
+    sf::Text missileText;
+    sf::Text commandText;
     sf::RenderWindow * window;
 
     

@@ -23,7 +23,7 @@ private:
     
     bool        moveRight = true;
     float       timeLife = 1.2f;
-    int         damage = 1;
+    float       damage = 1.0f;
 
     Game&       game;
 

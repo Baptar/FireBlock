@@ -40,7 +40,8 @@ void Ennemy::update(double _dt)
 		}
 		
 		if ((!Game::me->getPlayer().isDead && Game::me->hasPlayer(cx - 1, cy) && !moveRight)
-		|| (!Game::me->getPlayer().isDead && Game::me->hasPlayer(cx + 1, cy) && moveRight))
+		|| (!Game::me->getPlayer().isDead && Game::me->hasPlayer(cx + 1, cy) && moveRight)
+		|| (!Game::me->getPlayer().isDead && Game::me->hasPlayer(cx, cy)))
 		{
 			speedX = 0.0;
 			attack();
@@ -167,10 +168,10 @@ void Ennemy::setDropping(bool _onOff)
 	}
 }
 
-void Ennemy::takeDamage(int _damage, bool _goingRight)
+void Ennemy::takeDamage(float _damage, bool _goingRight)
 {
 	life -= _damage;
-	if (life <= 0)
+	if (life <= 0.0f)
 	{
 		spriteEnnemy.finishedAnimHurt = true;
 		isDead = true;
@@ -195,6 +196,12 @@ void Ennemy::attack()
 void Ennemy::attackEnd() const
 {
 	if (Game::me->getPlayer().isDead) return;
+	if (Game::me->hasPlayer(cx, cy))
+	{
+		Game::me->getPlayer().takeDamage(1);
+		return;
+	}
+	
 	if (moveRight)
 	{
 		if (Game::me->hasPlayer(cx + 1, cy))

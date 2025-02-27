@@ -41,6 +41,8 @@ public:
 	
 	bool							canJumpInput = true;
 	bool							closing = false;
+	bool							firing;
+	bool							firingLaser;
 
 	unsigned int					selectedElement = 0;
 	std::vector<sf::Vector2i>		walls;
