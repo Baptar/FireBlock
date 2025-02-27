@@ -266,10 +266,7 @@ void Game::pollInput(double _dt) {
 				}
 			}	
 		}
-		else if (!isEditing && !ImGui::IsWindowHovered() &&
-			!ImGui::IsAnyItemHovered() &&
-			!ImGui::IsAnyItemActive() &&
-			!ImGui::IsAnyItemFocused() && !getPlayer().jumping && !getPlayer().isDead && !getPlayer().spritePlayer.isDieing && getPlayer().life > 0 && !getPlayer().spritePlayer.isHurting && !getPlayer().firingLaser)
+		else if (!isEditing && !getPlayer().jumping && !getPlayer().isDead && !getPlayer().spritePlayer.isDieing && getPlayer().life > 0 && !getPlayer().spritePlayer.isHurting && !getPlayer().firingLaser)
 		{
 			firing = true;
 			getPlayer().fire();
@@ -278,6 +275,7 @@ void Game::pollInput(double _dt) {
 	else if (firing)
 	{
 		firing = false;
+		printf("STOOOOOPPPP FIRE");
 		getPlayer().stopFire();
 	}
 
@@ -285,10 +283,10 @@ void Game::pollInput(double _dt) {
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) || sf::Joystick::getAxisPosition(0, Joystick::Z) > 90.0f)
 	{
 		if (isEditing &&
-		!ImGui::IsWindowHovered() &&
-		!ImGui::IsAnyItemHovered() &&
-		!ImGui::IsAnyItemActive() &&
-		!ImGui::IsAnyItemFocused())
+			!ImGui::IsWindowHovered() &&
+			!ImGui::IsAnyItemHovered() &&
+			!ImGui::IsAnyItemActive() &&
+			!ImGui::IsAnyItemFocused())
 		{
 			int posX = (posMouse.x  / C::GRID_SIZE);
 			int posY = (posMouse.y / C::GRID_SIZE);
@@ -302,10 +300,7 @@ void Game::pollInput(double _dt) {
 				addEnnemy(posX, posY);
 			}	
 		}
-		else if (!isEditing && !ImGui::IsWindowHovered() &&
-			!ImGui::IsAnyItemHovered() &&
-			!ImGui::IsAnyItemActive() &&
-			!ImGui::IsAnyItemFocused() && !getPlayer().jumping && !getPlayer().isDead && !getPlayer().reloading  && !getPlayer().spritePlayer.isDieing && !getPlayer().firing)
+		else if (!isEditing && !getPlayer().jumping && !getPlayer().isDead && !getPlayer().reloading  && !getPlayer().spritePlayer.isDieing && !getPlayer().firing)
 		{
 			firingLaser = true;
 			getPlayer().fireLaser(_dt);
