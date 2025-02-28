@@ -330,7 +330,7 @@ void Player::fireLaser(double dt)
 	drawLaser(x0, y0, x0 + laserRangePixel, y0);
 	
 	// recul
-	dx += moveRight ? -reculPower / 5.0f : reculPower/ 5.0f;
+	dx += moveRight ? -reculPower / 100.0f : reculPower/ 100.0f;
 	
 	firingLaser = true;
 }

@@ -15,23 +15,52 @@ Ennemy::Ennemy(int _cx, int _cy): spriteEnnemy(SpriteEnnemy(*this))
 
 void Ennemy::update(double _dt)
 {
-	if (spriteEnnemy.finishedAnimDeath) return;
-
+	if (spriteEnnemy.finishedAnimDeath && !dropping) return;
+	
+	// Manage Recul
 	if (durationRecul > 0.0f) durationRecul -= _dt;
 	else recul = 0.0f;
+
+	Game& g = *Game::me;
+	double rate = 1.0 / _dt;
+	double dfr = 60.0f / rate;
+	dy += gravy * _dt;
+	dy = dy * pow(fry, dfr);
+	ry += dy * _dt;
+
+	// do this even if we are dead
+	if (dropping)
+	{
+		// Collision when go down
+		do
+		{
+			if (g.hasPlayerCollision(cx, cy + 1) && ry >= 0.99f)
+			{
+				setDropping(false);
+				dy = 0;
+				dx *= 0.5f;
+				ry = 0.99f;
+			}
+			else if (ry > 1)
+			{
+				ry--;
+				cy++;
+			}
+		} while (ry > 1);
+	}
+	else if (!g.hasPlayerCollision(cx, cy + 1))
+	{
+		setDropping(true);
+		gravy = 80;
+	}
+	syncPos();
 	
 	spriteEnnemy.update(_dt);
 	if (!isDead)
 	{	
-		Game& g = *Game::me;
-		double rate = 1.0 / _dt;
-		double dfr = 60.0f / rate;
-		
-		dy += gravy * _dt;
-		dy = dy * pow(fry, dfr);
 		dx = ((moveRight ?  speedX : -speedX) + recul) * pow(frx, dfr);
 		rx += dx * _dt;
-		ry += dy * _dt;
+		
 	
 		// Check not moving
 		if (dx <= 2.0f && dx >= -2.0f && dy <= 2.0f && !dropping)
@@ -87,32 +116,6 @@ void Ennemy::update(double _dt)
 				cx++;
 			}
 		} while (rx > 1);
-
-		if (dropping)
-		{
-			// Collision when go down
-			do
-			{
-				if (g.hasPlayerCollision(cx, cy + 1) && ry >= 0.99f)
-				{
-					setDropping(false);
-					dy = 0;
-					dx *= 0.5f;
-					ry = 0.99f;
-				}
-				else if (ry > 1)
-				{
-					ry--;
-					cy++;
-				}
-			} while (ry > 1);
-		}
-		else if (!g.hasPlayerCollision(cx, cy + 1))
-		{
-			setDropping(true);
-			gravy = 80;
-		}
-		syncPos();
 	}
 	
 }
