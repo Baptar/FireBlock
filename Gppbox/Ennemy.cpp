@@ -10,35 +10,76 @@ Ennemy::Ennemy(int _cx, int _cy): spriteEnnemy(SpriteEnnemy(*this))
 	setCooGrid(_cx, _cy);
 	speedX = Dice::randFloat(speedXMin, speedXMax);
 	isDead = false;
+	test = speedX;
 }
 
 void Ennemy::update(double _dt)
 {
-	if (spriteEnnemy.finishedAnimDeath) return;
+	if (spriteEnnemy.finishedAnimDeath && !dropping) return;
+	
+	// Manage Recul
+	if (durationRecul > 0.0f) durationRecul -= _dt;
+	else recul = 0.0f;
 
+	Game& g = *Game::me;
+	double rate = 1.0 / _dt;
+	double dfr = 60.0f / rate;
+	dy += gravy * _dt;
+	dy = dy * pow(fry, dfr);
+	ry += dy * _dt;
+
+	// do this even if we are dead
+	if (dropping)
+	{
+		// Collision when go down
+		do
+		{
+			if (g.hasPlayerCollision(cx, cy + 1) && ry >= 0.99f)
+			{
+				setDropping(false);
+				dy = 0;
+				dx *= 0.5f;
+				ry = 0.99f;
+			}
+			else if (ry > 1)
+			{
+				ry--;
+				cy++;
+			}
+		} while (ry > 1);
+	}
+	else if (!g.hasPlayerCollision(cx, cy + 1))
+	{
+		setDropping(true);
+		gravy = 80;
+	}
+	syncPos();
+	
 	spriteEnnemy.update(_dt);
 	if (!isDead)
 	{	
-		Game& g = *Game::me;
-		double rate = 1.0 / _dt;
-		double dfr = 60.0f / rate;
-		
-		dy += gravy * _dt;
-		dy = dy * pow(fry, dfr);
-		dx = (moveRight ?  speedX : -speedX) * pow(frx, dfr);
-
+		dx = ((moveRight ?  speedX : -speedX) + recul) * pow(frx, dfr);
 		rx += dx * _dt;
-		ry += dy * _dt;
+		
 	
 		// Check not moving
 		if (dx <= 2.0f && dx >= -2.0f && dy <= 2.0f && !dropping)
 		{
 			spriteEnnemy.playAnimationSprite(0, 0);
 		}
+		
+		if ((!Game::me->getPlayer().isDead && Game::me->hasPlayer(cx - 1, cy) && !moveRight)
+		|| (!Game::me->getPlayer().isDead && Game::me->hasPlayer(cx + 1, cy) && moveRight)
+		|| (!Game::me->getPlayer().isDead && Game::me->hasPlayer(cx, cy)))
+		{
+			speedX = 0.0;
+			attack();
+		}
+		else speedX = test;
 	
 		// Collision Left
 		do
-		{
+		{			
 			if (g.hasPlayerCollision(cx - 1, cy) && rx < 0.5)
 			{
 				moveRight = true;
@@ -51,7 +92,6 @@ void Ennemy::update(double _dt)
 				{
 					spriteEnnemy.playAnimationSprite(0, 1);
 				}
-				moveRight = false;
 				rx++;
 				cx--;
 			}
@@ -72,38 +112,12 @@ void Ennemy::update(double _dt)
 				{
 					spriteEnnemy.playAnimationSprite(0, 1);
 				}
-				moveRight = true;
 				rx--;
 				cx++;
 			}
 		} while (rx > 1);
-
-		if (dropping)
-		{
-			// Collision when go down
-			do
-			{
-				if (g.hasPlayerCollision(cx, cy + 1) && ry >= 0.99f)
-				{
-					setDropping(false);
-					dy = 0;
-					dx *= 0.5f;
-					ry = 0.99f;
-				}
-				else if (ry > 1)
-				{
-					ry--;
-					cy++;
-				}
-			} while (ry > 1);
-		}
-		else if (!g.hasPlayerCollision(cx, cy + 1))
-		{
-			setDropping(true);
-			gravy = 80;
-		}
-		syncPos();
 	}
+	
 }
 
 void Ennemy::setCooPixel(int _px, int _py)
@@ -157,16 +171,54 @@ void Ennemy::setDropping(bool _onOff)
 	}
 }
 
-void Ennemy::takeDamage(int _damage)
+void Ennemy::takeDamage(float _damage, bool _goingRight)
 {
-	printf("Ennemy::takeDamage()\n");
 	life -= _damage;
-	if (life <= 0)
+	if (life <= 0.0f)
 	{
+		spriteEnnemy.finishedAnimHurt = true;
 		isDead = true;
-		spriteEnnemy.playAnimationSprite(0, 2);
+		spriteEnnemy.setAnimationFrame(0, 2);
 	}
-	else spriteEnnemy.playAnimationSprite(0,3);
+	else
+	{
+		recul = abs(speedX * 1.5f );
+		//speedX += _goingRight ? recul :  -recul;
+		if (!_goingRight) recul *= -1.0f;
+		if (_goingRight == moveRight) recul *= -0.5f;
+		durationRecul = 0.2f;
+		spriteEnnemy.playAnimationSprite(0,3);
+	}
+}
+
+void Ennemy::attack()
+{
+	spriteEnnemy.playAnimationSprite(0, 4);
+}
+
+void Ennemy::attackEnd() const
+{
+	if (Game::me->getPlayer().isDead) return;
+	if (Game::me->hasPlayer(cx, cy))
+	{
+		Game::me->getPlayer().takeDamage(1);
+		return;
+	}
+	
+	if (moveRight)
+	{
+		if (Game::me->hasPlayer(cx + 1, cy))
+		{
+			Game::me->getPlayer().takeDamage(1);
+		}
+	}
+	else
+	{
+		if (Game::me->hasPlayer(cx - 1, cy))
+		{
+			Game::me->getPlayer().takeDamage(1);
+		}
+	}
 }
 
 bool Ennemy::im()
@@ -175,6 +227,7 @@ bool Ennemy::im()
 
 	bool chg = false;
 
+	Value("moveRight", moveRight);
 	Value("isDead", isDead);
 	Value("Dropping", dropping);
 	Value("cx", cx);

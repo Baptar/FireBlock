@@ -1,4 +1,4 @@
-﻿#include "SpritePlayer.h"
+﻿#include "SpritePlayer.hpp"
 
 #include "Player.hpp"
 
@@ -10,6 +10,15 @@ SpritePlayer::SpritePlayer(Player& _player): player(_player)
 
 void SpritePlayer::update(double _dt)
 {
+    if (durationDamage > 0.0f)
+    {
+        durationDamage -= _dt;
+    }
+    else
+    {
+        sprite.setColor(sf::Color::White);
+    }
+    
     animationTime += _dt;
     if (animationTime >= frameSpeed) {
         animationTime = 0;
@@ -26,7 +35,20 @@ void SpritePlayer::update(double _dt)
         {
             //Finished to reload
             player.reloading = false;
+            player.actualBullets = player.maxBullets;
             setAnimationFrame(0, 0);
+        }
+        // Hurt
+        else if (animationRow == 7 && currentFrame == 4)
+        {
+            isHurting = false;
+            setAnimationFrame(0, 0);
+        }
+        // death
+        else if (animationRow == 9 && currentFrame == 4)
+        {
+            player.isDead = true;
+            return;
         }
 		
         else
@@ -38,7 +60,7 @@ void SpritePlayer::update(double _dt)
 
 void SpritePlayer::playAnimationSprite(int _frame, int _animationRow)
 {
-    if (!(this->animationRow == _animationRow)) setAnimationFrame(_frame, _animationRow);
+    if (!(this->animationRow == _animationRow) && !isHurting && !isDieing) setAnimationFrame(_frame, _animationRow);
 }
 
 void SpritePlayer::CheckFileTexture()
@@ -67,6 +89,7 @@ void SpritePlayer::InitTexture()
 
 void SpritePlayer::setAnimationFrame(int _frame, int _animationRow)
 {
+    player.reloading = false;
     animationTime = 0.0f;
     this->animationRow = _animationRow;
     this->currentFrame = _frame % numberOfFrame;
@@ -103,14 +126,19 @@ void SpritePlayer::setAnimationFrame(int _frame, int _animationRow)
         numberOfFrame = 4;
         break;
     case 7:
+        isHurting = true;
+        sprite.setColor(sf::Color::Red);
+        durationDamage = 0.1f;
         sprite.setTexture(textureHurt);
         numberOfFrame = 5;
         break;
     case 8:
+        player.reloading = true;
         sprite.setTexture(textureReload);
         numberOfFrame = 17;
         break;
     case 9:
+        isDieing = true;
         sprite.setTexture(textureDeath);
         numberOfFrame = 5;
         break;

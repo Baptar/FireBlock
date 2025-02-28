@@ -17,11 +17,6 @@ Game*		Game::me = 0;
 static int	cols = C::RES_X / C::GRID_SIZE;
 static int	lastLine = C::RES_Y / C::GRID_SIZE - 1;
 
-struct Data {
-	char name[50];
-	Vector2i position;
-};
-
 Game::Game(sf::RenderWindow * _win): camera({C::RES_X / 2.f, C::RES_Y / 2.f}, {C::RES_X / 2.5f, C::RES_Y / 2.5f})
 {
 	this->win = _win;
@@ -33,6 +28,23 @@ Game::Game(sf::RenderWindow * _win): camera({C::RES_X / 2.f, C::RES_Y / 2.f}, {C
 	bg.setTexture(&texBG);
 	bg.setSize(sf::Vector2f(C::RES_X, C::RES_Y));
 	if (!textureWall_x4.loadFromFile("res/wall_x4.png")) printf("ERR : LOAD FAILED\n");
+	
+	if (!font.loadFromFile("res/MAIAN.ttf")) { printf("ERR : FONT LOAD FAILED\n"); }
+	gameOverText.setFont(font);
+	gameOverText.setString("GAME OVER");
+	gameOverText.setCharacterSize(60);
+	gameOverText.setFillColor(sf::Color::Red);
+	gameOverText.setStyle(sf::Text::Bold);
+	
+	munitionText.setFont(font);
+	munitionText.setCharacterSize(5);
+	munitionText.setFillColor(sf::Color::White);
+	munitionText.setStyle(sf::Text::Bold);
+	//munitionText.setPosition(win->getSize().x / 2, win->getSize().y / 2);
+	
+	// Centrer le texte (ancre au centre)
+	sf::FloatRect textRect = gameOverText.getLocalBounds();
+	gameOverText.setOrigin(textRect.width / 2.f, textRect.height / 2.f);
 
 	bgShader = new HotReloadShader("res/bg.vert", "res/bg.frag");
 
@@ -114,7 +126,18 @@ void Game::processInput(sf::Event _ev) {
 	
 	if (_ev.type == sf::Event::KeyReleased) {
 		if (_ev.key.code == Keyboard::R) {
-			getPlayer().reload();
+			if (getPlayer().actualBullets != getPlayer().maxBullets) getPlayer().reload();
+		}
+		if (_ev.key.code == Keyboard::Q) {
+			pressingLeft = false;
+		}
+		if (_ev.key.code == Keyboard::D) {
+			pressingRight = false;
+		}
+
+		if (_ev.key.code == Keyboard::E)
+		{
+			getPlayer().fireMissile();
 		}
 		
 		if (_ev.key.code == sf::Keyboard::Space)
@@ -127,21 +150,18 @@ void Game::processInput(sf::Event _ev) {
 	{
 		if (_ev.joystickButton.button == 0) //bottom
 		{
-			auto mainChar = players[0];
-			if (mainChar && !mainChar->jumping && !mainChar->reloading && canJumpInput) {
-				canJumpInput = false;
-				mainChar->setJumping(true);
-				
-			}
+			canJumpInput = true;
 		}
 		if (_ev.joystickButton.button == 1) // right
 		{
+			getPlayer().fireMissile();
 		}
 		if (_ev.joystickButton.button == 2) // left
 		{
+			if (getPlayer().actualBullets != getPlayer().maxBullets) getPlayer().reload();
 		}
 		if (_ev.joystickButton.button == 3) // top
-		{
+		{ 
 		}
 		if (_ev.joystickButton.button == 5) // R1
 		{
@@ -156,6 +176,14 @@ void Game::processInput(sf::Event _ev) {
 			auto mainChar = players[0];
 			if (mainChar) {
 				mainChar->stopFire();
+			}
+		}
+		if (_ev.mouseButton.button == sf::Mouse::Left)
+		{
+			// Stop Fire
+			auto mainChar = players[0];
+			if (mainChar) {
+				mainChar->StopFireLaser();
 			}
 		}
 	}
@@ -174,48 +202,45 @@ void Game::pollInput(double _dt) {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q) || sf::Joystick::getAxisPosition(0, Joystick::X) < -90.0f) {
 		if (players.size()) {
 			auto mainChar = players[0];
-			if (mainChar) {
+			if (mainChar && !mainChar->isDead && !mainChar->spritePlayer.isDieing) {
+				mainChar->moveRight = false;
+				pressingLeft = true;
 				if (mainChar->reloading) mainChar->dx = -lateralSpeed / 2.0f;
 				else mainChar->dx = -lateralSpeed;
 			}
 		}
 	}
+	else pressingLeft = false;
 	
 	// Move Right
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Joystick::getAxisPosition(0, Joystick::X) > 90.0f) {
 		if (players.size()) {
 			auto mainChar = players[0];
-			if (mainChar) {
+			if (mainChar && !mainChar->isDead && !mainChar->spritePlayer.isDieing) {
+				mainChar->moveRight = true;
+				pressingRight = true;
 				if (mainChar->reloading) mainChar->dx = lateralSpeed / 2.0f;
 				else mainChar->dx = lateralSpeed;
 			}
 		}
 	}
 	
+	else pressingRight = false;
+	
 	// Jump
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Joystick::isButtonPressed(0, 0)) {
 		if (players.size()) {
 			auto mainChar = players[0];
-			if (mainChar && !mainChar->jumping && !mainChar->reloading && !hasPlayerCollision(mainChar->cx, mainChar->cy - 1) && canJumpInput) {
+			if (mainChar && !mainChar->jumping && !mainChar->reloading && !hasPlayerCollision(mainChar->cx, mainChar->cy - 1) && canJumpInput && !mainChar->isDead && !mainChar->spritePlayer.isDieing) {
 				canJumpInput = false;
 				mainChar->dy -= 40;
 				mainChar->setJumping(true);
 			}
 		}
 	}
-	
-	// Adjust power of Jump
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)|| sf::Joystick::isButtonPressed(0, 0)) {
-		if (!wasPressed) {
-			onSpacePressed();
-			wasPressed = true;
-		}
-	}
-	else {
-		wasPressed = false;
-	}
 
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
+	// R2
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Right) || sf::Joystick::getAxisPosition(0, Joystick::Z) < -90.0f)
 	{
 		if (isEditing && !ImGui::IsWindowHovered()
 		&& !ImGui::IsAnyItemHovered()
@@ -246,29 +271,49 @@ void Game::pollInput(double _dt) {
 				}
 			}	
 		}
-		else if (!isEditing && !getPlayer().jumping)
+		else if (!isEditing && !getPlayer().jumping && !getPlayer().isDead && !getPlayer().spritePlayer.isDieing && getPlayer().life > 0 && !getPlayer().spritePlayer.isHurting && !getPlayer().firingLaser)
 		{
+			firing = true;
 			getPlayer().fire();
 		}
 	}
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Left)
-		&& !ImGui::IsWindowHovered()
-		&& !ImGui::IsAnyItemHovered()
-		&& !ImGui::IsAnyItemActive()
-		&& !ImGui::IsAnyItemFocused()
-		&& isEditing)
+	else if (firing)
 	{
-		int posX = (posMouse.x  / C::GRID_SIZE);
-		int posY = (posMouse.y / C::GRID_SIZE);
-		if (!hasWall(posX, posY) && editingWalls && !hasPlayer(posX, posY) && !hasEnnemy(posX, posY))
+		firing = false;
+		getPlayer().stopFire();
+	}
+
+	// L2
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) || sf::Joystick::getAxisPosition(0, Joystick::Z) > 90.0f)
+	{
+		if (isEditing &&
+			!ImGui::IsWindowHovered() &&
+			!ImGui::IsAnyItemHovered() &&
+			!ImGui::IsAnyItemActive() &&
+			!ImGui::IsAnyItemFocused())
 		{
-			addWall(posX, posY);
-			cacheWalls();
+			int posX = (posMouse.x  / C::GRID_SIZE);
+			int posY = (posMouse.y / C::GRID_SIZE);
+			if (!hasWall(posX, posY) && editingWalls && !hasPlayer(posX, posY) && !hasEnnemy(posX, posY))
+			{
+				addWall(posX, posY);
+				cacheWalls();
+			}
+			else if (!hasWall(posX, posY) && !hasWall(posX, posY - 1) && !hasEnnemy(posX, posY) && editingEnemies && !hasPlayer(posX, posY))
+			{
+				addEnnemy(posX, posY);
+			}	
 		}
-		else if (!hasWall(posX, posY) && !hasWall(posX, posY - 1) && !hasEnnemy(posX, posY) && editingEnemies && !hasPlayer(posX, posY))
+		else if (!isEditing && !getPlayer().jumping && !getPlayer().isDead && !getPlayer().reloading  && !getPlayer().spritePlayer.isDieing && !getPlayer().firing)
 		{
-			addEnnemy(posX, posY);
-		}	
+			firingLaser = true;
+			getPlayer().fireLaser(_dt);
+		}
+	}
+	else if (firingLaser)
+	{
+		firingLaser = false;
+		getPlayer().StopFireLaser();
 	}
 }
 
@@ -293,29 +338,20 @@ void Game::update(double _dt) {
 	
 	if (!isEditing)
 	{
-		//bg.setOrigin(bg.getSize().x / 2, bg.getSize().y / 2);
-		//bg.setPosition(cameraView.getCenter());
-		//bg.setSize(Vector2f(C::RES_X * zoom, C::RES_Y * zoom));
-
 		for (auto e : players) 
 			e->update(_dt);
 
 		for (auto e : ennemies)
 			e->update(_dt);
 	}
-	else
-	{
-		//bg.setOrigin(win->getDefaultView().getCenter());
-		//bg.setPosition(win->getDefaultView().getCenter());
 		//bg.setSize(Vector2f(win->getSize().x, win->getSize().y));
-	}
 	afterParts.update(_dt);
 
 	camera.update(_dt);
 	posMouse = sf::Mouse::getPosition(*win);
 }
 
- void Game::draw(sf::RenderWindow & _win) {
+void Game::draw(sf::RenderWindow & _win) {
 	if (closing) return;
 
 	sf::RenderStates states = sf::RenderStates::Default;
@@ -351,14 +387,23 @@ void Game::update(double _dt) {
 
 	for (auto e: players)
 		e->draw(_win);
-		
+
+	if (getPlayer().isDead && !isEditing) {
+		gameOverText.setPosition(win->getView().getCenter() - Vector2f(0.0f, 10.0f));
+		_win.draw(gameOverText);
+	}
+	else if (!getPlayer().isDead && !getPlayer().spritePlayer.isDieing && !isEditing)
+	{
+		munitionText.setString("Munitions : " + to_string(5));
+		//munitionText.setPosition(win->getView().getCenter() - Vector2f(std::round(win->getView().getSize().x / 2 - 5), int(-win->getView().getSize().y / 2 + 10)));
+		_win.draw(munitionText);
+	}
 
 	afterParts.draw(_win);
 	_win.setView(defaultView);
 }
 
-void Game::onSpacePressed() {
-}
+void Game::onSpacePressed() {}
 
 bool Game::hasPlayerCollision(int _cx, int _cy)
 {
@@ -449,6 +494,7 @@ void Game::saveData(const std::filesystem::path& _filePath) const
 	}
 	for (auto ennemy : ennemies)
 	{
+		if (!ennemy->isDead)
 		out << ennemy->cx << " " << ennemy->cy << " " << 1<<"\n";
 	}
 	for (auto p : players)

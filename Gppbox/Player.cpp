@@ -2,17 +2,14 @@
 
 #include "Player.hpp"
 
-#include "Bullet.h"
+#include "Bullet.hpp"
 #include "C.hpp"
 #include "Game.hpp"
 
-Player::Player(): spritePlayer(SpritePlayer(*this))
-{
-}
+Player::Player(): spritePlayer(SpritePlayer(*this)){}
 
 void Player::update(double dt){
-	spritePlayer.update(dt);
-	
+	// Manage destroy bullets
 	for (auto it = bullets.begin(); it != bullets.end(); ) {
 		Bullet* bullet = *it;
 		if (bullet == nullptr) it = bullets.erase(it);
@@ -24,6 +21,32 @@ void Player::update(double dt){
 			++it;
 		}
 	}
+	// Manage destroy missiles
+	for (auto it = missiles.begin(); it != missiles.end(); ) {
+		HomingMissile* missile = *it;
+		if (missile == nullptr) it = missiles.erase(it);
+		else if (missile->shouldDestroy) {
+			delete missile;
+			it = missiles.erase(it);
+		} else {
+			missile->update(dt);
+			++it;
+		}
+	}
+	
+	if (isDead)
+	{
+		spritePlayer.setAnimationFrame(4,9);
+		return;
+	}
+
+	if (!firingLaser)
+	{
+		if (delayStartRecupLaser > 0.0f) delayStartRecupLaser-= dt;
+		else currentTimeLaser = min(float(currentTimeLaser + dt), maxTimeLaser);
+	}
+	
+	spritePlayer.update(dt);
 	
 	Game& g = *Game::me;
 	double rate = 1.0 / dt;
@@ -56,12 +79,11 @@ void Player::update(double dt){
 		}
 		else if (rx < 0)
 		{
-			if (!jumping && !reloading)
+			if (!jumping && !reloading && g.pressingLeft)
 			{
 				if (firing) spritePlayer.playAnimationSprite(spritePlayer.currentFrame + 1, 10);
 				else if (!firing) spritePlayer.playAnimationSprite(spritePlayer.currentFrame + 1, 2);
 			}
-			moveRight = false;
 			rx++;
 			cx--;
 		}
@@ -78,12 +100,11 @@ void Player::update(double dt){
 		}
 		else if (rx > 1)
 		{
-			if (!jumping && !reloading)
+			if (!jumping && !reloading && g.pressingRight)
 			{
 				if (firing) spritePlayer.playAnimationSprite(spritePlayer.currentFrame + 1, 10);
 				else if (!firing) spritePlayer.playAnimationSprite(spritePlayer.currentFrame + 1, 2);
 			}
-			moveRight = true;
 			rx--;
 			cx++;
 		}
@@ -128,15 +149,23 @@ void Player::update(double dt){
 	{
 		if (!g.hasPlayerCollision(cx , cy + 1))
 		{
-			setJumping(true);
+			if (!reloading)	setJumping(true);
+			else
+			{
+				gravy = 110;
+				jumping = true;
+			}
 		}
 	}
 	syncPos();
 	
 	for (auto b : bullets)
 		b->update(dt);
-	
+	for (auto b : missiles)
+		b->update(dt);
 }
+
+sf::Vector2i Player::getPosPixel() const{ return sf::Vector2i( (cx+rx)*C::GRID_SIZE, (cy+ry) * C::GRID_SIZE ); }
 
 void Player::setCooPixel(int px, int py){
 	cx = px / C::GRID_SIZE;
@@ -157,7 +186,8 @@ void Player::setCooGrid(float coox, float cooy){
 	syncPos();
 }
 
-void Player::syncPos() {
+void Player::syncPos()
+{
 	spritePlayer.getSprite().setPosition((cx + rx) * C::GRID_SIZE, (cy + ry) * C::GRID_SIZE);
 }
 
@@ -166,6 +196,12 @@ void Player::draw(sf::RenderWindow& win){
 	
 	for (Bullet* b : bullets)
 		b->draw();
+
+	for (HomingMissile* b : missiles)
+		b->draw();
+	
+	for (sf::RectangleShape* r : laserSprites) 
+		win.draw(*r);
 }
 
 void Player::setJumping(bool onOff){
@@ -173,6 +209,7 @@ void Player::setJumping(bool onOff){
 		return;
 	
 	if (onOff) {
+		StopFireLaser();
 		stopFire();
 		spritePlayer.playAnimationSprite(0, 3);
 		gravy = 110;
@@ -185,9 +222,56 @@ void Player::setJumping(bool onOff){
 	}
 }
 
-sf::Vector2i Player::getPosPixel() const
+void Player::reload()
 {
-	return sf::Vector2i( (cx+rx)*C::GRID_SIZE, (cy+ry) * C::GRID_SIZE );
+	if (reloading || jumping) return;
+
+	StopFireLaser();
+	stopFire();
+	spritePlayer.playAnimationSprite(0, 8);
+}
+
+void Player::takeDamage(int damage)
+{
+	life -= damage;
+	if (life <= 0 && !spritePlayer.isDieing)
+	{
+		//spritePlayer.isDieing = true;
+		spritePlayer.isHurting = false;
+		spritePlayer.playAnimationSprite(0, 9);
+	}
+	else
+	{
+		if (!reloading && !firing) spritePlayer.playAnimationSprite(0, 7);
+		else
+		{
+			// spritePlayer.isHurting = true;
+			spritePlayer.sprite.setColor(sf::Color::Red);
+			spritePlayer.durationDamage = 0.1f;
+		}
+	}
+}
+
+#pragma region FireNormal
+void Player::fire()
+{
+	if (reloading || jumping || delayFire > 0) return;
+	if (actualBullets <= 0)
+	{
+		stopFire();
+		return;
+	}
+	delayFire = 0.1f;
+	Game::me->camera.addShake(cameraShakeAmplitude, cameraShakeFrequency, cameraShakeDuration);
+	
+	// Start Fire System
+	actualBullets--;
+	dx += moveRight ? -reculPower : reculPower;
+	firing = true;
+	if (dx > 2.0f || dx < -2.0f) spritePlayer.playAnimationSprite(spritePlayer.currentFrame + 1, 10);
+	else spritePlayer.playAnimationSprite(0, 6);
+	
+	bullets.push_back(new Bullet({cx, cy}, moveRight));
 }
 
 void Player::stopFire()
@@ -197,30 +281,112 @@ void Player::stopFire()
 	if (dx > 2.0f || dx < -2.0f) spritePlayer.playAnimationSprite(spritePlayer.currentFrame + 1, 2);
 	else spritePlayer.playAnimationSprite(0, 0);
 }
+#pragma endregion FireNormal
 
-void Player::fire()
+#pragma region Laser
+void Player::fireLaser(double dt)
 {
-	if (reloading || jumping || delayFire > 0) return;
-	delayFire = 0.1f;
-	Game::me->camera.addShake(cameraShakeAmplitude, cameraShakeFrequency, cameraShakeDuration);
+	if (currentTimeLaser <= 0.0f)
+	{
+		if (firingLaser) StopFireLaser();
+		return;
+	}
 	
-	// Start Fire System
-	firing = true;
-	if (dx > 2.0f || dx < -2.0f) spritePlayer.playAnimationSprite(spritePlayer.currentFrame + 1, 10);
-	else spritePlayer.playAnimationSprite(0, 6);
+	Game& g = *Game::me;
+
+	//firingLaser = true;
+
+	currentTimeLaser -= dt;
+	delayStartRecupLaser = 1.5f;
+	for(auto laser : laserSprites)
+		delete laser;
+	laserSprites.clear();
+
+	int x0 = moveRight ? (cx+rx+0.8f) * C::GRID_SIZE : (cx+rx-0.8f) * C::GRID_SIZE;
+	int y0 = (cy+ry - 1.15) * C::GRID_SIZE;
+
+	int laserLength = laserRange;
+	for(int i=0; i<laserRange; i++)
+	{
+		int j = moveRight ? i : -i;
+		if(Ennemy* ennemy  = g.getEnnemyAtPosition(cx + j, cy - 1))
+		{
+			ennemy->takeDamage(0.015f, moveRight);
+
+			laserLength = i - 1;
+			break;
+		}
+		if (g.hasWall(cx + j, cy - 1))
+		{
+			laserLength = i - 1;
+			break;
+		}
+	}
+
+	int laserRangePixel = laserLength * C::GRID_SIZE;
+	if(!moveRight)
+		laserRangePixel *= -1; 
+
+	drawLaser(x0, y0, x0 + laserRangePixel, y0);
 	
-	bullets.push_back(new Bullet({cx, cy}, moveRight));
+	// recul
+	dx += moveRight ? -reculPower / 60.0f : reculPower/ 60.0f;
+	
+	firingLaser = true;
 }
 
-void Player::reload()
+void Player::StopFireLaser()
 {
-	if (reloading || jumping) return;
+	for(auto laser : laserSprites)
+		delete laser;
+	laserSprites.clear();
 
-	stopFire();
-	reloading = true;
-	spritePlayer.playAnimationSprite(0, 8);
+	firingLaser = false;
 }
 
+
+void Player::drawLaser(int x0, int y0, int x1, int y1)
+{
+	int dx = x1 - x0;
+	int dy = y1 - y0;
+	if(dx != 0)
+	{
+		int D = 2 * dy - abs(dx);
+		int y = y0;
+		for(int i=0; dx < 0 ? i>dx : i<dx; dx < 0 ? i-- : i++)
+		{
+			createLaserPixel(x0 + i, y);
+			if(D > 0)
+			{ 
+				y++;
+				D -= 2 * abs(dx);
+			}
+			D += 2 * dy;
+		}
+	}
+}
+
+void Player::createLaserPixel(int x, int y)
+{
+	auto laserPixel = new sf::RectangleShape({1.0f, laserPixelSize});
+	laserPixel->setOrigin(0.5f, laserPixelSize * 0.5f);
+	laserPixel->setPosition(x, y);
+	laserPixel->setFillColor(sf::Color::Red);
+	laserSprites.push_back(laserPixel);
+}
+#pragma endregion Laser
+
+#pragma region Missile
+void Player::fireMissile()
+{
+	if (missileNumber > 0) missileNumber--;
+	else return;
+	
+	missiles.push_back(new HomingMissile({static_cast<float>(cx), static_cast<float>(cy)}, moveRight));
+}
+#pragma endregion Missile
+
+#pragma region Debug
 bool Player::im()
 {
 	using namespace ImGui;
@@ -231,6 +397,12 @@ bool Player::im()
 			b->im();
 		TreePop();
 	}
+	if (TreeNodeEx("Missiles", 0)) {
+		for (auto b : missiles)
+			b->im();
+		TreePop();
+	}
+	Value("life", life);
 	Value("animation Row", spritePlayer.animationRow);
 	Value("currentFrame", spritePlayer.currentFrame);
 	Value("jumping", jumping);
@@ -265,6 +437,10 @@ bool Player::im()
 	chg |= DragFloat("shake duration", &cameraShakeDuration, 0.001f, 0, 2);
 
 	if (Button("reset")) {
+		life = 10;
+		isDead = false;
+		actualBullets = maxBullets;
+		spritePlayer.playAnimationSprite(0, 0);
 		cx = 3;
 		cy = 54;
 		rx = 0.5f;
@@ -275,6 +451,7 @@ bool Player::im()
 	}
 	return chg||chgCoo;
 }
+#pragma endregion Debug
 
 
 

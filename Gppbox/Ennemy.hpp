@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <SFML/Graphics.hpp>
 
-#include "SpriteEnnemy.h"
+#include "SpriteEnnemy.hpp"
 
 namespace sf
 {
@@ -11,8 +11,9 @@ namespace sf
 class Ennemy
 {
 public:
+    float test;
     SpriteEnnemy spriteEnnemy;
-    int         life = 5;
+    float         life = 7.0f;
     bool        isDead = false;
     
     int			cx = 0;
@@ -31,7 +32,9 @@ public:
     float		fry = 0.95f;
 
     bool        dropping = false;
-    bool		moveRight = true;    
+    bool		moveRight = true;
+    float       recul = 0.0f;
+    float       durationRecul = 1.0f;
     
                     Ennemy(int _cx, int _cy);
     void            update(double _dt);
@@ -42,6 +45,8 @@ public:
     void			draw(sf::RenderWindow& _win);
     bool			im();
     void            setDropping(bool _onOff);
-    void            takeDamage(int _damage);
+    void            takeDamage(float _damage, bool _goingRight);
+    void            attack();
+    void            attackEnd() const;
 
 };

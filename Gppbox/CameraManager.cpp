@@ -1,4 +1,4 @@
-﻿#include "CameraManager.h"
+﻿#include "CameraManager.hpp"
 
 #include "C.hpp"
 #include "imgui.h"

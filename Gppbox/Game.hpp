@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <vector>
 
-#include "CameraManager.h"
+#include "CameraManager.hpp"
 #include "Ennemy.hpp"
 #include "SFML/Graphics.hpp"
 #include "SFML/Window.hpp"
@@ -24,6 +24,10 @@ public:
 	sf::Texture						texBG;
 	HotReloadShader *				bgShader = nullptr;
 	CameraManager					camera;
+
+	sf::Font						font;
+	sf::Text						gameOverText;
+	sf::Text						munitionText;
 	
 	float							zoom = 0.28f;
 	float							f = 0.7f;
@@ -37,6 +41,8 @@ public:
 	
 	bool							canJumpInput = true;
 	bool							closing = false;
+	bool							firing;
+	bool							firingLaser;
 
 	unsigned int					selectedElement = 0;
 	std::vector<sf::Vector2i>		walls;
@@ -56,6 +62,8 @@ public:
 
 	void							processInput(sf::Event _ev);
 	bool							wasPressed = false;
+	bool							pressingRight = false;
+	bool							pressingLeft = false;
 	void							pollInput(double _dt);
 	void							onSpacePressed();
 
