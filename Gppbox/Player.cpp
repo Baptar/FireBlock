@@ -242,7 +242,13 @@ void Player::takeDamage(int damage)
 	}
 	else
 	{
-		spritePlayer.playAnimationSprite(0, 7);
+		if (!reloading && !firing) spritePlayer.playAnimationSprite(0, 7);
+		else
+		{
+			// spritePlayer.isHurting = true;
+			spritePlayer.sprite.setColor(sf::Color::Red);
+			spritePlayer.durationDamage = 0.1f;
+		}
 	}
 }
 

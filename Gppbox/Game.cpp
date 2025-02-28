@@ -134,6 +134,11 @@ void Game::processInput(sf::Event _ev) {
 		if (_ev.key.code == Keyboard::D) {
 			pressingRight = false;
 		}
+
+		if (_ev.key.code == Keyboard::E)
+		{
+			getPlayer().fireMissile();
+		}
 		
 		if (_ev.key.code == sf::Keyboard::Space)
 		{
@@ -275,7 +280,6 @@ void Game::pollInput(double _dt) {
 	else if (firing)
 	{
 		firing = false;
-		printf("STOOOOOPPPP FIRE");
 		getPlayer().stopFire();
 	}
 

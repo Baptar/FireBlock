@@ -19,7 +19,6 @@ void SpriteExplosion::update(double dt)
     if (animationTime >= frameSpeed) {
         if (currentFrame == numberOfFrame-1)
         {
-            printf("Finished Anim");
             play = false;
             finishedAnim = true;
             return;
@@ -36,7 +35,6 @@ void SpriteExplosion::update(double dt)
 void SpriteExplosion::setAnimationFrame(int _frame)
 {
     play = true;
-    printf("start setAnimationFrame\n");
     animationTime = 0.0f;
     this->currentFrame = _frame % numberOfFrame;
     

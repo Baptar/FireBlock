@@ -5,7 +5,7 @@ class Player;
 
 class SpritePlayer
 {
-private:
+public:
     sf::Sprite sprite;
     sf::Texture textureIdle;
     sf::Texture textureWalk;

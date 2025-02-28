@@ -17,7 +17,7 @@ class Player{
 public:
 	SpritePlayer spritePlayer;
 
-	int			missileNumber = 3;
+	int			missileNumber = 8;
 	
 	float		maxTimeLaser = 5.0f;
 	float		currentTimeLaser = maxTimeLaser;
