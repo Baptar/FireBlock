@@ -170,9 +170,9 @@ void HomingMissile::findTarget() {
 
 void HomingMissile::missileTouched()
 {
-    float		cameraShakeAmplitude = 3.0f;
-    float		cameraShakeFrequency = 0.2f;
-    float		cameraShakeDuration = 0.2f;
+    float		cameraShakeAmplitude = 7.0f;
+    float		cameraShakeFrequency = 1.0f;
+    float		cameraShakeDuration = 0.5f;
     Game& g = *Game::me;
     g.camera.addShake(cameraShakeAmplitude, cameraShakeFrequency, cameraShakeDuration);
     for (int i = -2; i < 3 ; i++)
