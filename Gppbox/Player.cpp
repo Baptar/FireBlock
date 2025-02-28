@@ -311,7 +311,7 @@ void Player::fireLaser(double dt)
 		int j = moveRight ? i : -i;
 		if(Ennemy* ennemy  = g.getEnnemyAtPosition(cx + j, cy - 1))
 		{
-			ennemy->takeDamage(0.05f, moveRight);
+			ennemy->takeDamage(0.015f, moveRight);
 
 			laserLength = i - 1;
 			break;
@@ -330,7 +330,7 @@ void Player::fireLaser(double dt)
 	drawLaser(x0, y0, x0 + laserRangePixel, y0);
 	
 	// recul
-	dx += moveRight ? -reculPower / 100.0f : reculPower/ 100.0f;
+	dx += moveRight ? -reculPower / 60.0f : reculPower/ 60.0f;
 	
 	firingLaser = true;
 }

@@ -156,15 +156,18 @@ void HomingMissile::findTarget() {
     //target = Game::me->getClosestEnemy(position);
     if (!game.ennemies.empty())
     {
+        list<Ennemy*> ennemiesCopy;
         for (auto ennemy : Game::me->ennemies)
         {
             if (!ennemy->isDead)
             {
-                foundTarget = true;
-                target = ennemy;
-                return;
+                ennemiesCopy.push_back(ennemy);
             }
         }
+        auto it = ennemiesCopy.begin();
+        std::advance(it, Dice::randInt(0, ennemiesCopy.size() - 1));
+        target = *it;
+        foundTarget = true;
     }
 }
 
