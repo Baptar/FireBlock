@@ -59,13 +59,13 @@ int main()
 	}
 
 	// Manage sound
-	sf::SoundBuffer buffer;
-	if (!buffer.loadFromFile("mainSound.wav")) return 1;
+	//sf::SoundBuffer buffer;
+	//if (!buffer.loadFromFile("mainSound.wav")) return 1;
 	
-	sf::Sound sound;
-	sound.setBuffer(buffer);
-	sound.setVolume(20);
-	sound.setLoop(true);
+	//sf::Sound sound;
+	//sound.setBuffer(buffer);
+	//sound.setVolume(20);
+	//sound.setLoop(true);
 	//sound.play();
 
 	// init ImGui SFML
