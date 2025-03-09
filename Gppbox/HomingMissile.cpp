@@ -164,6 +164,8 @@ void HomingMissile::findTarget() {
                 ennemiesCopy.push_back(ennemy);
             }
         }
+        if (ennemiesCopy.empty()) return;
+        
         auto it = ennemiesCopy.begin();
         std::advance(it, Dice::randInt(0, ennemiesCopy.size() - 1));
         target = *it;
